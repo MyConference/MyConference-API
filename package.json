@@ -1,0 +1,32 @@
+{
+	"name": "myconference-api",
+  "description": "API for MyConference",
+  "version": "0.1.0",
+
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/MyConference/MyConference-API.git"
+  },
+
+  "main": "api.js",
+
+  "scripts": {
+    "start": "node api.js"
+  },
+
+  "engines": {
+    "node": "~0.10"
+  },
+
+  "dependencies": {
+    "passport": "~0.1",
+    "passport-google": "~0.3",
+    "mongoose": "~3.8",
+    "underscore": "~1.5",
+    "async": "~0.2",
+    "node-uuid": "~1.4",
+    "sprintf": "~0.1",
+    "restify": "~2.6",
+    "winston": "~0.7"
+  }
+}
