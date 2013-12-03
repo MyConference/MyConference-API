@@ -8,7 +8,7 @@ var loginSchema = mongoose.Schema({
 
   'type':  { 'type': String, 'index': true },
   'user':  { 'type': String, 'index': true, 'ref': 'User' },
-  'other': Mixed
+  'data': Mixed
 });
 
 module.exports = mongoose.model('LoginMethod', loginSchema);

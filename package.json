@@ -27,6 +27,7 @@
     "node-uuid": "~1.4",
     "sprintf": "~0.1",
     "restify": "~2.6",
-    "winston": "~0.7"
+    "winston": "~0.7",
+    "bcrypt": "~0.7.7"
   }
 }

@@ -62,6 +62,7 @@ var server = restify.createServer({
 });
 
 // Global middleware
+//server.use(restify.logger());
 server.use(restify.bodyParser({ mapParams: false }));
 
 // Routes

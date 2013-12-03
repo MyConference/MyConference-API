@@ -5,10 +5,11 @@ var ObjectID = mongoose.Schema.Types.ObjectId;
 
 var refreshTokenSchema = mongoose.Schema({
   '_id':          { 'type': String, 'default': uuid.v4, 'index': true },
-  
   'active':       { 'type': Boolean, 'default': true },
-  'access_token': ObjectID,
+
+  'access_token': { 'type': String, 'ref': 'AccessToken' },
   'device':       String,
+
   'created':      { 'type': Date, 'default': Date.now },
   'expires':      { 'type': Date, 'default': Date.now }
 });
