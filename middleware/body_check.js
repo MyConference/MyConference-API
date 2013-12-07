@@ -1,6 +1,3 @@
-var restify = require('restify');
-
-
 function checkObjectSchema (schema, object, cb) {
 
   cb(null);

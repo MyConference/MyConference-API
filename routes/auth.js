@@ -242,6 +242,10 @@ module.exports = function (server) {
                     return icb(err);
                   }
 
+                  if (!lm) {
+                    return icb(new restify.NotAuthorizedError());
+                  }
+
                   if (lm.type != 'password') {
                     // WTF!
                     winston.error('Login method "%s" is of type "%s"', lmid, lm.type);

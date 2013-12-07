@@ -93,12 +93,20 @@ server.on('after', function (req, res, route, err) {
 
   winston.info(str);
 });
+
 server.use(restify.bodyParser({ mapParams: false }));
 
 // Routes
 fs.readdirSync("./routes").forEach(function (file) {
   require("./routes/" + file)(server);
 });
+
+server.get('/test',
+  require('./middleware/token_check').tokenCheck(true),
+  function (req, res, next) {
+    res.send({'token': req.token, 'user': req.user});
+    next();
+  });
 
 server.listen(conf.http.port, function() {
   winston.info('Server listening at %s', server.url);
