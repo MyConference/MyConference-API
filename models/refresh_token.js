@@ -8,6 +8,7 @@ var refreshTokenSchema = mongoose.Schema({
   'active':       { 'type': Boolean, 'default': true },
 
   'access_token': { 'type': String, 'ref': 'AccessToken' },
+  'application':  { 'type': String, 'ref': 'Application' },
   'device':       String,
 
   'created':      { 'type': Date, 'default': Date.now },

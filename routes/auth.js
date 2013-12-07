@@ -1,7 +1,8 @@
 var async = require('async');
 var mongoose = require('mongoose');
 var restify = require('restify');
-var bcrypt = require('bcrypt')
+var bcrypt = require('bcrypt');
+var winston = require('winston');
 
 /* Models */
 var Application = mongoose.model('Application');
@@ -282,30 +283,52 @@ module.exports = function (server) {
             async.waterfall([
               // Find the refresh token
               function (icb) {
-                RefreshToken.findById(body.credentials.refresh_token, function (err, rtok) {
+                RefreshToken
+                  .findById(body.credentials.refresh_token)
+                  .populate('user')
+                  .exec(function (err, rtok)
+                {
                   if (err) {
                     return icb(err);
                   }
 
-                  icb(null, rtok);
+                  return icb(null, rtok);
                 });
               },
 
-              // Check that everything is OK (appid, devid, expiration)
+              // Check that everything is OK (appid, devid, expiration, active)
               function (rtok, icb) {
+                var expires = rtok.expires.getTime();
 
-                icb(null);
+                if (!rtok.active 
+                 || expires < Date.now
+                 || rtok.application != app.id
+                 || rtok.device != body.device_id
+                ) {
+                  return icb(new restify.InvalidArgumentError('invalid refresh token'));
+                }
+
+                icb(null, rtok);
               },
 
-              // Revoke the old access token
+              // Revoke the refresh token
+              function (rtok, icb) {
+                rtok.update({'active': false}, function (err) {
+                  if (err) {
+                    return icb(err);
+                  }
+
+                  return icb(null, rtok.user);
+                });
+              }
 
               // Return the old access token user
-              ], function (err) {
+              ], function (err, user) {
                 if (err) {
                   return cb(err);
                 }
 
-                cb(null, app, null);
+                cb(null, app, user);
             });
           break;
           
@@ -369,6 +392,9 @@ module.exports = function (server) {
 
         var refToken = new RefreshToken({
           'access_token': accToken.id,
+
+          'application': accToken.application,
+          'device': accToken.device,
 
           'created': now,
           'expires': refExpire

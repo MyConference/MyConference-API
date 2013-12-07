@@ -34,7 +34,8 @@ winston.add(winston.transports.Console, {
 
 mongoose.connect(conf.mongo.uri);
 mongoose.connection.on('error', function (err) {
-  winston.error('MongoDB: %s', err);
+  winston.error('MongoDB error: %s', err.toString());
+  winston.error(err);
 });
 mongoose.connection.once('open', function () {
   winston.info('Connected to MongoDB');
