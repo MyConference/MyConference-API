@@ -224,16 +224,16 @@ module.exports = function (server) {
       /* Find the user trying to log in */
       function (app, cb) {
         switch (body.credentials.type) {
-          // Anonymous login -- null user
+          /* Anonymous login */
           case 'anonymous':
             cb(null, app, null); 
           break;
 
+          /* Login with email+password */
           case 'password':
             var lmid = 'password!' + body.credentials.email;
 
             async.waterfall([
-
               // Find a login method with the given user id
               function (icb) {
                 LoginMethod.findById(lmid).populate('user').exec(function (err, lm) {
@@ -262,6 +262,7 @@ module.exports = function (server) {
                     return icb(new restify.NotAuthorizedError());
                   }
 
+
                   return icb(null, lm.user);
                 });
               }
@@ -274,15 +275,43 @@ module.exports = function (server) {
 
                 return cb(null, app, user);
             });
-
           break;
           
+          /* Login using a refresh token */
           case 'refresh':
-            fn(body.credentials, cb); 
+            async.waterfall([
+              // Find the refresh token
+              function (icb) {
+                RefreshToken.findById(body.credentials.refresh_token, function (err, rtok) {
+                  if (err) {
+                    return icb(err);
+                  }
+
+                  icb(null, rtok);
+                });
+              },
+
+              // Check that everything is OK (appid, devid, expiration)
+              function (rtok, icb) {
+
+                icb(null);
+              },
+
+              // Revoke the old access token
+
+              // Return the old access token user
+              ], function (err) {
+                if (err) {
+                  return cb(err);
+                }
+
+                cb(null, app, null);
+            });
           break;
           
           case 'thirdparty':
-            fn(body.credentials, cb); 
+            //fn(body.credentials, cb); 
+            cb('not-implemented');
           break;
           
           default:
@@ -299,12 +328,12 @@ module.exports = function (server) {
           .setOptions({ 'multi': true })
           .update(
             {'active': false },
-            function (err,count) {
+            function (err, count) {
               if (err) {
                 return cb(err);
               }
 
-              cb(null, app, user);
+              return cb(null, app, user);
             });
       },
 

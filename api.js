@@ -1,26 +1,15 @@
+var bunyan   = require('bunyan');
 var fs       = require('fs');
 var mongoose = require('mongoose');
 var restify  = require('restify');
+var sprintf  = require('sprintf');
 var winston  = require('winston');
 
 /* =========================== */
 /* === SETUP CONFIGURATION === */
 
-var DEBUG = process.env.NODE_ENV != 'production';
 
-var conf = {
-  // MongoDB and Mongoose configuration
-  'mongo': {
-    'uri': process.env.MOGOLAB_URI
-        || process.env.MONGO_URI
-        || 'mongodb://localhost/myconference-api'
-  },
-
-  // HTTP and HTTPS configuration
-  'http': {
-    'port': DEBUG ? 4321 : 80
-  }
-};
+var conf = require('./config.js');
 
 
 /* ===================== */
@@ -29,7 +18,14 @@ var conf = {
 winston.clear();
 winston.cli();
 winston.add(winston.transports.Console, {
-  'level': DEBUG ? 'debug' : 'info'
+  'timestamp': function () {
+    var date = new Date();
+    return sprintf('\033[90m%02d:%02d:%02d.%03d\033[m',
+      date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+  },
+  'prettyPrint': true,
+  'colorize': true,
+  'level': conf.debug ? 'debug' : 'info'
 });
 
 
@@ -57,12 +53,45 @@ fs.readdirSync("./models").forEach(function (file) {
 /* ===================== */
 /* === SETUP RESTIFY === */
 
+
+
 var server = restify.createServer({
   'name': 'MyConference API'
 });
 
 // Global middleware
 //server.use(restify.logger());
+server.on('after', function (req, res, route, err) {
+  var stcod = res.statusCode;
+  var color;
+  if (stcod < 200) {
+    color = 35;
+  } else if (stcod < 300) {
+    color = 32;
+  } else if (stcod < 400) {
+    color = 36;
+  } else if (stcod < 500) {
+    color = 33;
+  } else {
+    color = 31;
+  }
+
+  // Log it
+  var str = '\033[97m' + req.method + '\033[m';
+  str += ' ' + req.url;
+  str += ' \033[' + color + 'm' + stcod + '\033[m';
+
+  if (err) {
+    str += ' \033[31m' + (err.constructor.name) + '\033[m';
+  }
+
+  var ctsize = res.headers['Content-Length']
+  if (typeof ctsize !== 'undefined') {
+    str += ' ' + ctsize + 'B';
+  }
+
+  winston.info(str);
+});
 server.use(restify.bodyParser({ mapParams: false }));
 
 // Routes
