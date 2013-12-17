@@ -55,15 +55,16 @@ fs.readdirSync("./models").forEach(function (file) {
 /* === SETUP RESTIFY === */
 
 
-
 var server = restify.createServer({
-  'name': 'MyConference API'
+  'name': 'MyConference API',
+  'version': '0.1.0'
 });
 
 // Global middleware
 //server.use(restify.logger());
 server.on('after', function (req, res, route, err) {
   var stcod = res.statusCode;
+
   var color;
   if (stcod < 200) {
     color = 35;

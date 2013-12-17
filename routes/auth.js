@@ -14,6 +14,8 @@ var User = mongoose.model('User');
 /* Middleware */
 var bodyCheck = require('../middleware/body_check.js').bodyCheck;
 
+var errors = require('../errors.js');
+
 /* Other */
 function fnCheckAppExists (appid, cb) {
   Application.findById(appid, function (err, app) {
@@ -25,7 +27,7 @@ function fnCheckAppExists (appid, cb) {
     // If app not found
     if (!app) {
       // TODO use a proper exception
-      return cb(new restify.InvalidArgumentError("invalid application"));
+      return cb(new errors.invalidApplicationError());
     }
 
     // Else all alright 
@@ -41,7 +43,7 @@ module.exports = function (server) {
   /**
    * POST  /auth/signup/ 
    */
-  server.post('/v0.1/auth/signup',
+  server.post('/auth/signup',
 
     // Check body fields
     bodyCheck({
@@ -98,7 +100,7 @@ module.exports = function (server) {
 
           // If exists
           if (lm) {
-            return cb(new restify.InvalidArgumentError("invalid email"));
+            return cb(new errors.InvalidEmailError());
           }
 
           return cb(null);
@@ -109,7 +111,7 @@ module.exports = function (server) {
       /* Check that the password is OK */
       function (cb) {
         if (body.user_data.password.length < 8) {
-          return cb(new restify.InvalidArgumentError("invalid password"));
+          return cb(new restify.InvalidPasswordError());
         }
 
         return cb(null);
@@ -264,7 +266,7 @@ module.exports = function (server) {
                   }
 
                   if (!result) {
-                    return icb(new restify.NotAuthorizedError());
+                    return icb(new errors.InvalidEmailOrPasswordError());
                   }
 
 
@@ -309,7 +311,7 @@ module.exports = function (server) {
                  || rtok.application != app.id
                  || rtok.device != body.device_id
                 ) {
-                  return icb(new restify.InvalidArgumentError('invalid refresh token'));
+                  return icb(new errors.InvalidRefreshError());
                 }
 
                 icb(null, rtok);
@@ -342,7 +344,7 @@ module.exports = function (server) {
           break;
           
           default:
-            cb(new restify.InvalidArgumentError("invalid credentials type"));
+            cb(new errors.InvalidCredentialsError());
         }
       },
 

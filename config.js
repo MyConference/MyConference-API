@@ -9,9 +9,10 @@ config.mongo = {
       || 'mongodb://localhost/myconference-api'
 };
 
-// HTTP and HTTPS configuration
+// HTTP configuration
 config.http = {
-  'port': config.debug ? 4321 : 80
+  'port': process.env.HTTP_PORT
+      || config.debug ? 4321 : 80
 };
 
 module.exports = config;
