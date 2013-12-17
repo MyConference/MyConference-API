@@ -5,7 +5,7 @@ var util = require('util');
 function error (status, name, code) {
   var err = function (message) {
     restify.RestError.call(this, {
-      'restCode': code
+      'restCode': code,
       'statusCode': status,
       'message': message,
       'constructorOpt': err
@@ -31,7 +31,7 @@ module.exports = {
   'InvalidRefreshError':         error(401, 'InvalidRefresh', 'invalid_refresh'),
 
   'InvalidEmailOrPasswordError': error(400, 'InvalidEmailOrPassword', 'invalid_email_or_password'),
-  
+
   'InvalidCredentialsError':     error(409, 'InvalidCredentials', 'invalid_credentials'),
   'InvalidPasswordError':        error(409, 'InvalidPassword', 'invalid_password'),
   'InvalidEmailError':           error(409, 'InvalidEmail', 'invalid_email'),
