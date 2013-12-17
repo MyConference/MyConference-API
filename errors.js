@@ -8,13 +8,16 @@ function error (status, name, code) {
       'restCode': code,
       'statusCode': status,
       'message': message,
-      'constructorOpt': err
+      'constructorOpt': err,
+      'name': name
     });
     
     this.name = name;
   };
 
   util.inherits(err, restify.RestError);
+
+  return err;
 }
 
 // Actual error classes

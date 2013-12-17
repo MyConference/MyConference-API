@@ -245,7 +245,7 @@ module.exports = function (server) {
                   }
 
                   if (!lm) {
-                    return icb(new restify.NotAuthorizedError());
+                    return icb(new errors.InvalidEmailOrPasswordError());
                   }
 
                   if (lm.type != 'password') {
