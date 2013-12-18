@@ -27,7 +27,7 @@ function fnCheckAppExists (appid, cb) {
     // If app not found
     if (!app) {
       // TODO use a proper exception
-      return cb(new errors.invalidApplicationError());
+      return cb(new errors.InvalidApplicationError());
     }
 
     // Else all alright 
@@ -47,29 +47,32 @@ module.exports = function (server) {
 
     // Check body fields
     bodyCheck({
-      /* ID of the application */
-      'application_id': {
-        'type': String
-      },
+      'type': Object,
+      'fields': {
+        /* ID of the application */
+        'application_id': {
+          'type': String
+        },
 
-      /* ID of the device */
-      'device_id': {
-        'type': String
-      },
+        /* ID of the device */
+        'device_id': {
+          'type': String
+        },
 
-      /* Data for the new user */
-      'user_data': {
-        'type': Object,
-        'fields': {
+        /* Data for the new user */
+        'user_data': {
+          'type': Object,
+          'fields': {
 
-          /* E-Mail of the user */
-          'email': {
-            'type': String
-          },
+            /* E-Mail of the user */
+            'email': {
+              'type': String
+            },
 
-          /* Password of the user */
-          'password': {
-            'type': String
+            /* Password of the user */
+            'password': {
+              'type': String
+            }
           }
         }
       }
@@ -176,7 +179,12 @@ module.exports = function (server) {
         return next(err);
       }
 
-      res.send({'user_id': user.id});
+      res.send({
+        'user': {
+          'id': user.id, 
+          'uri': req.base + '/users/' + user.id
+        }
+      });
       return next();
     });
   });
@@ -184,28 +192,31 @@ module.exports = function (server) {
 
 
   /* POST  /auth/ */
-  server.post('/v0.1/auth',
+  server.post('/auth',
 
     // Check body fields
     bodyCheck({
-      /* ID of the application */
-      'application_id': {
-        'type': String
-      },
+      'type': Object,
+      'fields': {
+        /* ID of the application */
+        'application_id': {
+          'type': String
+        },
 
-      /* ID of the device */
-      'device_id': {
-        'type': String
-      },
+        /* ID of the device */
+        'device_id': {
+          'type': String
+        },
 
-      /* Credentials of the login */
-      'credentials': {
-        'type': Object,
-        'fields': {
+        /* Credentials of the login */
+        'credentials': {
+          'type': Object,
+          'fields': {
 
-          /* Type of the credentials */
-          'type': {
-            'type': String
+            /* Type of the credentials */
+            'type': {
+              'type': String
+            }
           }
         }
       }

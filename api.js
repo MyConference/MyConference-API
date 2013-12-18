@@ -29,6 +29,10 @@ winston.add(winston.transports.Console, {
 });
 
 
+winston.data('MyConference API starting in ' +
+  (conf.debug ? 'debug' : 'production').toUpperCase() +
+  ' mode');
+
 /* ====================== */
 /* === SETUP MONGOOSE === */
 
@@ -96,6 +100,11 @@ server.on('after', function (req, res, route, err) {
 });
 
 server.use(restify.bodyParser({ mapParams: false }));
+
+server.use(function (req, res, next) {
+  req.baseUri = conf.http.proto + '://' + req.header('host');
+  next();
+});
 
 // Routes
 fs.readdirSync("./routes").forEach(function (file) {

@@ -26,6 +26,8 @@ var client = restify.createJsonClient({
 var app = process.argv[3];
 var device = uuid.v4();
 
+winston.data({'url':process.argv[2], 'app':process.argv[3]});
+
 var commands = {
   'quit': function (rl, args, cb) {
     rl.close();
