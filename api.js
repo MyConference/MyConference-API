@@ -16,9 +16,7 @@ var conf = require('./config.js');
 /* === SETUP WINSTON === */
 
 winston.clear();
-if (conf.debug) {
-  winston.cli();
-}
+winston.cli();
 winston.add(winston.transports.Console, {
   'timestamp': !conf.debug ? false : function () {
     var date = new Date();
