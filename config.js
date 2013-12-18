@@ -4,7 +4,7 @@ var config = {
 
 // MongoDB and Mongoose configuration
 config.mongo = {
-  'uri': process.env.MOGOLAB_URI
+  'uri': process.env.MONGOLAB_URI
       || process.env.MONGO_URI
       || 'mongodb://localhost/myconference-api'
 };
