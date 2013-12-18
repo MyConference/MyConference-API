@@ -12,7 +12,8 @@ config.mongo = {
 // HTTP configuration
 config.http = {
   'proto': 'http',
-  'port': process.env.HTTP_PORT
+  'port': process.env.PORT
+      || process.env.HTTP_PORT
       || (config.debug ? 4321 : 80)
 };
 
