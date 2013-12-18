@@ -21,7 +21,6 @@ function matchType (object, type) {
     return (Array.isArray(object));
 
   } else  {
-    console.log(type);
     throw new Error('Invalid type: ' + type);
   }
 }
@@ -95,9 +94,7 @@ function checkObjectSchema (schema, object, cb) {
 /* Performs an object check on the body */
 module.exports.bodyCheck = function (bodySchema) {
   return function (req, res, next) {
-    console.log(req.body);
     checkObjectSchema(bodySchema, req.body, function (err) {
-      console.log(err);
       if (err) {
         next(new errors.InvalidBodyError());
       }
@@ -106,18 +103,3 @@ module.exports.bodyCheck = function (bodySchema) {
     });
   };
 }
-
-
-
-
-var objSchema = {
-  'type': Object,
-  'fields': {
-    'a': {'type': String},
-    'b': {'type': Object, 'fields': {'c': {'type':String}}}
-  }
-};
-
-checkObjectSchema(objSchema, {'a':'A', 'b':{'c':12}}, function(err){
-  console.log(err);
-});
