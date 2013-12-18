@@ -13,7 +13,7 @@ config.mongo = {
 config.http = {
   'proto': 'http',
   'port': process.env.HTTP_PORT
-      || config.debug ? 4321 : 80
+      || (config.debug ? 4321 : 80)
 };
 
 module.exports = config;
