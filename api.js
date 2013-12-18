@@ -16,15 +16,17 @@ var conf = require('./config.js');
 /* === SETUP WINSTON === */
 
 winston.clear();
-winston.cli();
+if (conf.debug) {
+  winston.cli();
+}
 winston.add(winston.transports.Console, {
-  'timestamp': function () {
+  'timestamp': !conf.debug ? false : function () {
     var date = new Date();
     return sprintf('\033[90m%02d:%02d:%02d.%03d\033[m',
       date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
   },
   'prettyPrint': true,
-  'colorize': true,
+  'colorize': conf.debug,
   'level': conf.debug ? 'debug' : 'info'
 });
 
