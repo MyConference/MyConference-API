@@ -121,3 +121,27 @@ server.get('/test',
 server.listen(conf.http.port, function() {
   winston.info('Server listening at %s', server.url);
 });
+
+
+// =========================
+// === GRACEFUL SHUTDOWN ===
+
+var shutdown = function () {
+  winston.info('Shutting down!');
+  process.removeAllListeners();
+
+  server.once('close', function () {
+    winston.debug('Server closed');
+
+    mongoose.connection.once('close', function () {
+      winston.debug('MongoDB closed');
+    });
+    
+    mongoose.connection.close();
+  });
+
+  server.close();
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
