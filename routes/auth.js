@@ -114,7 +114,7 @@ module.exports = function (server) {
       /* Check that the password is OK */
       function (cb) {
         if (body.user_data.password.length < 8) {
-          return cb(new restify.InvalidPasswordError());
+          return cb(new errors.InvalidPasswordError());
         }
 
         return cb(null);

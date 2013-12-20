@@ -44,7 +44,7 @@ var commands = {
 
     winston.info('Logging in...');
 
-    client.post('/v0.1/auth', {
+    client.post('/auth', {
       'application_id': app,
       'device_id': device,
       'credentials': {
