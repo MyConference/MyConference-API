@@ -401,12 +401,12 @@ module.exports = function (server) {
             return cb(err);
           }
 
-          return cb(null, accToken);
+          return cb(null, user, accToken);
         });
       },
 
       /* Generate the refresh token */
-      function (accToken, cb) {
+      function (user, accToken, cb) {
         var now = Date.now();
         var refExpire = now + 28 * 86400000; // 4 weeks
 
@@ -425,11 +425,11 @@ module.exports = function (server) {
             return cb(err);
           }
 
-          return cb(null, accToken, refToken);
+          return cb(null, user, accToken, refToken);
         });
       },
 
-    ], function (err, accToken, refToken) {
+    ], function (err, user, accToken, refToken) {
       if (err) {
         return next(err);
       }
@@ -438,7 +438,8 @@ module.exports = function (server) {
         'access_token': accToken.id,
         'access_token_expires': accToken.expires.toISOString(),
         'refresh_token': refToken.id,
-        'refresh_token_expires': refToken.expires.toISOString()
+        'refresh_token_expires': refToken.expires.toISOString(),
+        'user': user ? user.toMicroRepr() : null
       });
 
       return next();
