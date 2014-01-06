@@ -82,7 +82,7 @@ module.exports = function (server) {
     function (req, res, next)
   {
     var body = req.body;
-    var lmid = 'password!' + body.user_data.email;
+    var lmk = body.user_data.email;
 
     async.waterfall([
       function (cb) {
@@ -95,7 +95,11 @@ module.exports = function (server) {
 
       /* Check that the login method does not exist */
       function (app, cb) {
-        LoginMethod.findById(lmid, function (err, lm) {
+        LoginMethod.findOne()
+          .where('type').equals('password')
+          .where('key').equals(lmk)
+          .exec(function (err, lm)
+        {
           // If error, fast exit
           if (err) {
             return cb(err);
@@ -155,14 +159,15 @@ module.exports = function (server) {
       /* Create the new login method */
       function (user, pwd, cb) {
         var lm = new LoginMethod({
-          '_id': lmid,
-
           'type': 'password',
           'user': user.id,
+
+          'key': lmk,
           'data': {
             'password': pwd
           }
         });
+        
         lm.save(function (err) {
           if (err) {
             return cb(err);
@@ -182,7 +187,7 @@ module.exports = function (server) {
       res.send({
         'user': {
           'id': user.id, 
-          'uri': req.base + '/users/' + user.id
+          'uri': user.uri
         }
       });
       return next();
@@ -245,24 +250,22 @@ module.exports = function (server) {
 
           /* Login with email+password */
           case 'password':
-            var lmid = 'password!' + body.credentials.email;
+            var lmk = body.credentials.email;
 
             async.waterfall([
               // Find a login method with the given user id
               function (icb) {
-                LoginMethod.findById(lmid).populate('user').exec(function (err, lm) {
+                LoginMethod.findOne()
+                  .where('type').equals('password')
+                  .where('key').equals(lmk)
+                  .populate('user').exec(function (err, lm)
+                {
                   if (err) {
                     return icb(err);
                   }
 
                   if (!lm) {
                     return icb(new errors.InvalidEmailOrPasswordError());
-                  }
-
-                  if (lm.type != 'password') {
-                    // WTF!
-                    winston.error('Login method "%s" is of type "%s"', lmid, lm.type);
-                    icb(new restify.InternalServerError());
                   }
 
                   return icb(null, lm);

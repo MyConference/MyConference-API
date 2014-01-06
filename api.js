@@ -38,10 +38,9 @@ winston.data('MyConference API starting in ' +
 
 mongoose.connect(conf.mongo.uri);
 mongoose.connection.on('error', function (err) {
-  winston.error('MongoDB error: %s', err.toString());
-  winston.error(err);
+  winston.error('MongoDB error', err);
 });
-mongoose.connection.once('open', function () {
+mongoose.connection.on('open', function () {
   winston.info('Connected to MongoDB');
 });
 
@@ -108,11 +107,13 @@ server.use(function (req, res, next) {
 
 // Routes
 fs.readdirSync("./routes").forEach(function (file) {
+  winston.debug('Reading routes from %s', './routes/'+file);
   require("./routes/" + file)(server);
 });
 
 server.get('/test',
   require('./middleware/token_check').tokenCheck(true),
+  
   function (req, res, next) {
     res.send({'token': req.token, 'user': req.user});
     next();
@@ -129,6 +130,13 @@ server.listen(conf.http.port, function() {
 var shutdown = function () {
   winston.info('Shutting down!');
   process.removeAllListeners();
+
+  /* Kill app */
+  var sdto = setTimeout(function () {
+  	winston.warn('Closing forcefully!');
+  	process.exit(1);
+  }, 5000);
+  sdto.unref();
 
   server.once('close', function () {
     winston.debug('Server closed');

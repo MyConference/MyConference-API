@@ -23,8 +23,6 @@ module.exports = function (server) {
     /* Actual code */
     function (req, res, next)
   {
-
-
     async.waterfall([
       /* Get the user */
       function (cb) {
@@ -48,10 +46,64 @@ module.exports = function (server) {
         return next(err);
       }
 
-      res.send({
-        'id': user.id,
-        'uri': req.baseUri + '/users/' + user.id
-      });
+      res.send(user.toFullRepr());
+      next();
+    });
+  });
+
+
+  server.get('/users/:uuid/conferences',
+    /* Toekn check */
+    tokenCheck(true),
+
+    /* Actual code */
+    function (req, res, next)
+  {
+    async.waterfall([
+      /* Check it's you */
+      function (cb) {
+        if (req.params.uuid != req.user.id) {
+          return cb(new restify.ForbiddenError());
+        }
+
+        return cb(null);
+      },
+
+      /* Get the user */
+      function (cb) {
+        User
+          .findById(req.params.uuid)
+          .populate('conferences.owner')
+          .populate('conferences.collaborator')
+          .populate('conferences.assistant')
+          .exec(function (err, user)
+        {
+          if (err) {
+            return cb(err);
+          }
+
+          if (!user) {
+            return cb(new restify.NotFoundError());
+          }
+
+          return cb(null, user);
+        });
+      },
+
+      /* Merge the conferences with the role */
+      function (user, cb) {
+        var userRepr = user.toFullRepr();
+        cb(null, userRepr.conferences);
+      }
+    ],
+
+    /* Send the results */
+    function (err, result) {
+      if (err) {
+        return next(err);
+      }
+
+      res.send(result);
       next();
     });
   });

@@ -6,7 +6,7 @@ var errors = require('../errors.js');
 
 module.exports.tokenCheck = function (requireUser) {
   return function (req, res, next) {
-    var authHeader = req.headers.authorization;
+    var authHeader = req.headers.authorization || '';
     var parts = authHeader.split(' ');
 
     if (parts.length != 2 || parts[0] != 'Token') {
