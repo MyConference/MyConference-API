@@ -6,8 +6,8 @@ var conf = require('../config.js');
 
 /* Models */
 var LoginMethod = mongoose.model('LoginMethod');
-var User = mongoose.model('User');
-var Conference = mongoose.model('Conference');
+var User        = mongoose.model('User');
+var Conference  = mongoose.model('Conference');
 
 /* Middleware */
 var bodyCheck = require('../middleware/body_check.js').bodyCheck;
@@ -52,6 +52,77 @@ module.exports = function (server) {
       res.send(conf.toFullRepr());
       next();
     });
+  });
+
+
+  server.post('/conferences',
+    /* Token check */
+    tokenCheck(true),
+
+    /* Body check */
+    bodyCheck({
+      'type': Object,
+      'fields': {
+        /* Name of the conference */
+        'name': {
+          'type': String
+        },
+
+        /* Description of the conference */
+        'description': {
+          'type': String
+        }
+      }
+    }),
+
+    /* Actual code */
+    function (req, res, next)
+  {
+    async.waterfall([
+        /* Create a new conference */
+        function (cb) {
+          var conf = new Conference({
+            'name':        req.body.name,
+            'description': req.body.description,
+            'users.owner': [req.user.id]
+          });
+
+          cb(null, conf);
+        },
+
+        /* Save it */
+        function (conf, cb) {
+          conf.save(function (err) {
+            if (err) {
+              return cb(err);
+            }
+
+            cb(null, conf);
+          });
+        },
+
+        /* Add it to the current user */
+        function (conf, cb) {
+          req.user.conferences.owner.push(conf);
+          req.user.save(function (err) {
+            if (err) {
+              return cb(err);
+            }
+
+            cb(null, conf);
+          });
+        }
+      ],
+
+      /* Return the conference */
+      function (err, conf) {
+        if (err) {
+          return next(err);
+        }
+
+        res.send(conf.toFullRepr());
+        next();
+      });
   });
 
 };

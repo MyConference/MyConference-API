@@ -56,7 +56,7 @@ conferenceSchema.methods.toFullRepr = function () {
 
     this.users[role].forEach(function (user) { 
       if (typeof user === 'string') {
-        user = mongoose.model('Users').getMicroRepr(user);
+        user = mongoose.model('User').getMicroRepr(user);
       } else {
         user = user.toSimpleRepr();
       }
