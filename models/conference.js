@@ -10,10 +10,12 @@ var conferenceSchema = mongoose.Schema({
   'description': {'type': String, 'default': ''},
 
   'users': {
-  	'owner':        {'type': [String], 'deault': [], 'ref': 'User'},
-  	'collaborator': {'type': [String], 'deault': [], 'ref': 'User'},
-  	'assistant':    {'type': [String], 'deault': [], 'ref': 'User'},
-  }
+  	'owner':        {'type': [String], 'default': [], 'ref': 'User'},
+  	'collaborator': {'type': [String], 'default': [], 'ref': 'User'},
+  	'assistant':    {'type': [String], 'default': [], 'ref': 'User'},
+  },
+
+  'documents': {'type': [String], 'default': [], 'ref': 'Document'}
 });
 
 conferenceSchema.virtual('uri').get(function () {
@@ -50,6 +52,7 @@ conferenceSchema.methods.toSimpleRepr = function () {
 conferenceSchema.methods.toFullRepr = function () {
   var repr = this.toSimpleRepr();
   repr.users = [];
+  repr.documents = this.documents;
 
   for (r in roles) {
     var role = roles[r];
