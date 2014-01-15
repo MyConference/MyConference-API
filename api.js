@@ -1,4 +1,3 @@
-var bunyan   = require('bunyan');
 var fs       = require('fs');
 var mongoose = require('mongoose');
 var restify  = require('restify');
@@ -7,7 +6,6 @@ var winston  = require('winston');
 
 /* =========================== */
 /* === SETUP CONFIGURATION === */
-
 
 var conf = require('./config.js');
 
