@@ -51,9 +51,18 @@ conferenceSchema.methods.toSimpleRepr = function () {
 
 conferenceSchema.methods.toFullRepr = function () {
   var repr = this.toSimpleRepr();
-  repr.users = [];
-  repr.documents = this.documents;
 
+  // Put all documents
+  repr.documents = this.documents.map(function (doc, idx) {
+    if (typeof doc === 'string') {
+      return mongoose.model('Document').getMicroRepr(doc);
+    } else {
+      return doc.toSimpleRepr();
+    }
+  });
+
+  // Put all users
+  repr.users = [];
   for (r in roles) {
     var role = roles[r];
 

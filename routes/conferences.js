@@ -27,7 +27,12 @@ module.exports = function (server) {
     async.waterfall([
       /* Get the conference */
       function (cb) {
-        Conference.findById(req.params.uuid).exec(function (err, conf) {
+        Conference
+          .findById(req.params.uuid)
+          .populate('documents')
+          .populate('users')
+          .exec(function (err, conf)
+        {
           if (err) {
             return cb(err);
           }
@@ -41,6 +46,11 @@ module.exports = function (server) {
       },
 
       /* Get the rights for the current user */
+      function (conf, cb) {
+        // Check the user appear on the list of users for the conference
+        // TODO
+        cb(conf);
+      }
     ],
 
     /* Send the results */
