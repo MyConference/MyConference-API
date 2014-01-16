@@ -47,19 +47,29 @@ module.exports = function (server) {
 
       /* Get the rights for the current user */
       function (conf, cb) {
-        // Check the user appear on the list of users for the conference
-        // TODO
-        cb(conf);
+        // Check the user appears on the list of users for the conference
+        var perms = conf.users.all.some(function (user) {
+          return user.id == req.user.id;
+        });
+
+        cb(null, conf, perms);
       }
     ],
 
     /* Send the results */
-    function (err, conf) {
+    function (err, conf, perms) {
       if (err) {
         return next(err);
       }
 
-      res.send(conf.toFullRepr());
+      var repr;
+      if (perms) {
+        repr = conf.toFullRepr();
+      } else {
+        repr = conf.toSimpleRepr();
+      }
+
+      res.send(repr);
       next();
     });
   });
