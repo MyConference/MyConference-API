@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-var winston = require('winston');
-var async = require('async');
-var restify = require('restify');
+var winston  = require('winston');
+var async    = require('async');
+var restify  = require('restify');
 var readline = require('readline');
-var uuid = require('node-uuid');
+var uuid     = require('node-uuid');
+var mongoose = require('mongoose');
 
 var conf = require('../config.js');
+
+var Application = require('../models/application.js');
 
 // Logger
 winston.clear();
@@ -16,21 +19,19 @@ winston.add(winston.transports.Console, {
   'level': 'debug'
 });
 
-var session = {};
+var session = {
+  'device': uuid.v4()
+};
 
 var client = restify.createJsonClient({
-  'url': process.argv[2],
+  'url': 'http://' + conf.http.host,
   'version': '*'
 });
-
-var app = process.argv[3];
-var device = uuid.v4();
-
-winston.data({'url':process.argv[2], 'app':process.argv[3]});
 
 var commands = {
   'quit': function (rl, args, cb) {
     rl.close();
+    mongoose.connection.close();
   },
 
   'login': function (rl, args, cb) {
@@ -45,8 +46,8 @@ var commands = {
     winston.info('Logging in...');
 
     client.post('/auth', {
-      'application_id': app,
-      'device_id': device,
+      'application_id': session.app,
+      'device_id': session.device,
       'credentials': {
         'type': 'password',
         'email': user,
@@ -60,8 +61,49 @@ var commands = {
       winston.info('Login successful');
       winston.data(obj);
       
-      session.token = obj.access_token;
+      session.token   = obj.access_token;
       session.refresh = obj.refresh_token;
+      session.user    = obj.user.id;
+
+      client.headers.authorization = 'Token ' + session.token;
+
+      cb();
+    });
+  },
+
+  'request': function (rl, args, cb) {
+    if (args.length != 2 && args.length != 3) {
+      winston.error('login expects 2 or 3 arguments, %d given', args.length);
+    }
+
+    var method = args[0].toUpperCase();
+    var path   = args[1];
+    var body   = args.length >= 3 ? JSON.parse(args[2]) : null;
+
+    winston.info('%s %s', method, path);
+    if (body) {
+      winston.data(body);
+    }
+
+    var fun = null;
+    switch (method) {
+      case 'GET':    fun = client.get.bind(client, path); break;
+      case 'POST':   fun = client.post.bind(client, path, body); break;
+      case 'DELETE': fun = client.del.bind(client, path); break;
+      case 'PUT':    fun = client.put.bind(client, path, body); break;
+      case 'HEAD':   fun = client.head.bind(client, path); break;
+      default:
+        winston.error('Method %s not available', method);
+        return cb();
+    }
+
+    fun(function (err, req, res, obj) {
+      if (err) {
+        winston.error('Error in request: %s', res.statusCode, obj);
+        return cb();
+      }
+
+      winston.info('Request OK: %s', res.statusCode, obj);
       cb();
     });
   }
@@ -119,4 +161,29 @@ var askLine = function () {
   });
 }
 
-askLine();
+mongoose.connect(conf.mongo.uri);
+mongoose.connection.on('error', function (err) {
+  winston.error('MongoDB error', err);
+  mongoose.connection.close();
+});
+mongoose.connection.on('open', function () {
+  winston.info('Connected to MongoDB');
+});
+mongoose.connection.on('close', function () {
+  winston.info('Disconnected from MongoDB');
+  mongoose.connection.removeAllListeners();
+  rl.close();
+});
+
+Application.findOne({'name': '$SCRIPT$'}).exec(function (err, app) {
+  if (err || !app) {
+    winston.error('Error finding the $SCRIPT$ app', err);
+    return mongoose.connection.close();
+  }
+  session.app = app.id;
+
+  winston.debug('Found app id: %s', app.id);
+  winston.info('Using device id: %s', session.device);
+
+  askLine();
+});

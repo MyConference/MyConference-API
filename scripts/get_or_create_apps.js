@@ -59,9 +59,10 @@ mongoose.connection.once('open', function () {
   }
 
   async.parallel({
-    'web': getOrCreate('$WEB$'),
-    'ios': getOrCreate('$IOS$'),
-    'android': getOrCreate('$ANDROID$')
+    'web':     getOrCreate('$WEB$'),
+    'ios':     getOrCreate('$IOS$'),
+    'android': getOrCreate('$ANDROID$'),
+    'script':  getOrCreate('$SCRIPT$')
 
   }, function (err, data) {
     if (err) {
