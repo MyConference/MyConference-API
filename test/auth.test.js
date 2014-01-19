@@ -71,7 +71,7 @@ describe('Auth', function () {
     });
 
 
-    it('should reject and invalid application', function (done) {
+    it('should reject an invalid application', function (done) {
       client.post('/auth/signup', {
         'application_id': uuid.v4(),
         'device_id': uuid.v4(),
@@ -83,7 +83,13 @@ describe('Auth', function () {
         expect(err).to.be.ok;
         expect(obj.code).to.equal('invalid_application');
 
-        done();
+        LoginMethod.findOne({'key': 'john.doe@example.org'}, function (err, lm) {
+          if (err) return done(err);
+
+          expect(lm).to.not.be.ok;
+
+          done();
+        });
       });
     });
 
@@ -100,7 +106,13 @@ describe('Auth', function () {
         expect(err).to.be.ok;
         expect(obj.code).to.equal('invalid_email');
 
-        done();
+        LoginMethod.findOne({'key': 'notanemail'}, function (err, lm) {
+          if (err) return done(err);
+
+          expect(lm).to.not.be.ok;
+
+          done();
+        });
       });
     });
 
@@ -134,7 +146,13 @@ describe('Auth', function () {
         expect(err).to.be.ok;
         expect(obj.code).to.equal('invalid_password');
 
-        done();
+        LoginMethod.findOne({'key': 'john.doe@example.org'}, function (err, lm) {
+          if (err) return done(err);
+
+          expect(lm).to.not.be.ok;
+
+          done();
+        });
       });
     });
   });
@@ -142,26 +160,111 @@ describe('Auth', function () {
 
   describe('Login', function () {
 
-    it('should reject an invalid application');
+    it('should reject an invalid application', function (done) {
+      client.post('/auth', {
+        'application_id': uuid.v4(),
+        'device_id': uuid.v4(),
+        'credentials': {
+          'type': 'anonymous'
+        }
+      }, function (err, req, res, obj) {
+        expect(err).to.be.ok;
+        expect(obj.code).to.equal('invalid_application');
+
+        done();
+      })
+    });
 
 
     it('should invalidate old access/refresh tokens');
 
 
     describe('Anonymous', function () {
-      it('should login anonymously with no errors');
+      it('should login anonymously with no errors', function (done) {
+        client.post('/auth', {
+          'application_id': mongo.values.applicationId,
+          'device_id': uuid.v4(),
+          'credentials': {
+            'type': 'anonymous'
+          }
+        }, function (err, req, res, obj) {
+          if (err) return done(err);
+
+          expect(obj).to.have.property('access_token');
+          expect(obj).to.have.property('access_token_expires');
+          expect(obj).to.have.property('refresh_token');
+          expect(obj).to.have.property('refresh_token_expires');
+          expect(obj).to.have.property('user');
+          expect(obj.user).to.equal(null);
+
+          done();
+        })
+      });
     });
 
 
     describe('Password', function () {
 
-      it('should log in a registered user');
+      it('should log in a registered user', function (done) {
+        client.post('/auth', {
+          'application_id': mongo.values.applicationId,
+          'device_id': uuid.v4(),
+          'credentials': {
+            'type': 'password',
+            'email': mongo.values.registeredEmail,
+            'password': mongo.values.registeredPassword
+          }
+        }, function (err, req, res, obj) {
+          if (err) return done(err);
+
+          expect(obj).to.have.property('access_token');
+          expect(obj).to.have.property('access_token_expires');
+          expect(obj).to.have.property('refresh_token');
+          expect(obj).to.have.property('refresh_token_expires');
+          expect(obj).to.have.property('user');
+          expect(obj.user).to.have.property('id');
+          expect(obj.user).to.have.property('uri');
+          expect(obj.user.id).to.equal(mongo.values.registeredUser);
+
+          done();
+        });
+      });
 
 
-      it('should reject an unregistered email');
+      it('should reject an unregistered email', function (done) {
+        client.post('/auth', {
+          'application_id': mongo.values.applicationId,
+          'device_id': uuid.v4(),
+          'credentials': {
+            'type': 'password',
+            'email': 'unregistered.email@example.org',
+            'password': mongo.values.registeredPassword
+          }
+        }, function (err, req, res, obj) {
+          expect(err).to.be.ok;
+          expect(obj.code).to.equal('invalid_email_or_password');
+
+          done();
+        });
+      });
 
 
-      it('should reject an incorrect password');
+      it('should reject an incorrect password', function (done) {
+        client.post('/auth', {
+          'application_id': mongo.values.applicationId,
+          'device_id': uuid.v4(),
+          'credentials': {
+            'type': 'password',
+            'email': mongo.values.registeredEmail,
+            'password': uuid.v4()
+          }
+        }, function (err, req, res, obj) {
+          expect(err).to.be.ok;
+          expect(obj.code).to.equal('invalid_email_or_password');
+          
+          done();
+        });
+      });
 
     });
 
