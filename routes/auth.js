@@ -2,6 +2,7 @@ var async = require('async');
 var mongoose = require('mongoose');
 var restify = require('restify');
 var bcrypt = require('bcrypt');
+var validator = require('validator');
 var winston = require('winston');
 
 /* Models */
@@ -115,6 +116,16 @@ module.exports = function (server) {
       },
 
 
+      /* Check that the email is OK */
+      function (cb) {
+        if (validator.isEmail(body.user_data.email)) {
+          return cb(null);
+        }
+
+        return cb(new errors.InvalidEmailError());
+      },
+
+
       /* Check that the password is OK */
       function (cb) {
         if (body.user_data.password.length < 8) {
@@ -127,7 +138,9 @@ module.exports = function (server) {
 
       /* Create the new user*/
       function (cb) {
-        var user = new User({});
+        var user = new User({
+          'conferences': {}
+        });
         user.save(function (err) {
           if (err) {
             return cb(err);

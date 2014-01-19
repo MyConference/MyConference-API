@@ -1,4 +1,5 @@
 var config = {
+  'test':  process.env.NODE_ENV == 'test',
   'debug': process.env.NODE_ENV != 'production'
 };
 

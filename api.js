@@ -1,3 +1,4 @@
+var async    = require('async');
 var fs       = require('fs');
 var mongoose = require('mongoose');
 var restify  = require('restify');
@@ -23,13 +24,24 @@ winston.add(winston.transports.Console, {
   },
   'prettyPrint': true,
   'colorize': conf.debug,
-  'level': conf.debug ? 'debug' : 'info'
+  'level': conf.test ? 'warn' : conf.debug ? 'debug' : 'info'
 });
 
 
-winston.data('MyConference API starting in ' +
-  (conf.debug ? 'debug' : 'production').toUpperCase() +
+winston.info('MyConference API starting in ' +
+  (conf.test ? 'test' : conf.debug ? 'debug' : 'production').toUpperCase() +
   ' mode');
+
+
+/* ==================== */
+/* === SETUP MODELS === */
+
+fs.readdirSync("./models").forEach(function (file) {
+  var model = require("./models/" + file);
+  winston.debug("Loaded model: %s", model.modelName);
+});
+
+
 
 /* ====================== */
 /* === SETUP MONGOOSE === */
@@ -42,14 +54,6 @@ mongoose.connection.on('open', function () {
   winston.info('Connected to MongoDB');
 });
 
-
-/* ==================== */
-/* === SETUP MODELS === */
-
-fs.readdirSync("./models").forEach(function (file) {
-  var model = require("./models/" + file);
-  winston.debug("Loaded model: %s", model.modelName);
-});
 
 
 /* ===================== */
@@ -125,7 +129,9 @@ server.listen(conf.http.port, function() {
 // =========================
 // === GRACEFUL SHUTDOWN ===
 
-var shutdown = function () {
+var shutdown = function (done) {
+  done = done || function () {};
+
   winston.info('Shutting down!');
   process.removeAllListeners();
 
@@ -133,21 +139,31 @@ var shutdown = function () {
   var sdto = setTimeout(function () {
   	winston.warn('Closing forcefully!');
   	process.exit(1);
-  }, 5000);
+  }, 15000);
   sdto.unref();
 
-  server.once('close', function () {
-    winston.debug('Server closed');
+  async.parallel([
+    function (cb) {
+      server.once('close', function () {
+        winston.debug('Server closed');
+        cb();
+      });
+      server.close();
+    },
 
-    mongoose.connection.once('close', function () {
-      winston.debug('MongoDB closed');
-    });
-    
-    mongoose.connection.close();
-  });
-
-  server.close();
+    function (cb) {
+      mongoose.connection.once('close', function () {
+        winston.debug('MongoDB closed');
+        cb();
+      });
+      mongoose.connection.close();
+    }
+  ], done);
 };
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Export functions for the testing framework
+module.exports.shutdown = shutdown;
+module.exports.server = server;
