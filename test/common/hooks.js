@@ -1,11 +1,13 @@
 var async = require('async');
+var winston = require('winston');
 
 var mongo  = require('./mongo.js');
-var server = require('./server.js');
+var server = require('../../server.js');
 
 
 module.exports.before = function (done) {
   server.start(done);
+  winston.clear();
 }
 
 module.exports.beforeEach = function (done) {
