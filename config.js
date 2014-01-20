@@ -18,4 +18,9 @@ config.http = {
   'host': process.env.HOST || 'localhost:4321'
 };
 
+// Security things
+config.security = {
+  rounds: config.test ? 1 : config.debug ? 8 : 13
+};
+
 module.exports = config;

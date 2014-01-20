@@ -14,7 +14,9 @@ var User = mongoose.model('User');
 
 /* Middleware */
 var bodyCheck = require('../middleware/body_check.js').bodyCheck;
+var tokenCheck = require('../middleware/token_check.js').tokenCheck;
 
+var config = require('../config.js');
 var errors = require('../errors.js');
 
 /* Other */
@@ -39,6 +41,75 @@ function fnCheckAppExists (appid, cb) {
 /* Define the routes */
 module.exports = function (server) {
 
+  /**
+   * POST  /auth/check-user
+   */
+  server.post('/auth/check-user', tokenCheck(true), function (req, res, next) {
+    res.send({
+      'id': req.user.id,
+      'uri': req.user.uri
+    });
+
+    next();
+  });
+
+
+  /**
+   * POST  /auth/check-anon
+   */
+  server.post('/auth/check-anon', tokenCheck(false), function (req, res, next) {
+    res.send({});
+    next();
+  });
+
+
+  /**
+   * POST  /auth/logout
+   */
+  server.post('/auth/logout',
+
+    // Check token
+    tokenCheck(false),
+
+    // Check body
+    bodyCheck({
+      'type': Object,
+      'fields': {}
+    }),
+
+    // Logout!
+    function (req, res, next) {
+      var user = req.user;
+      var atok = req.token;
+
+      async.parallel([
+        /* Invalidate the access token */
+        function (cb) {
+          atok.active = false;
+          atok.save(function (err) {
+            cb(err);
+          });
+        },
+
+        /* Find and invalidate the refresh token */
+        function (cb) {
+          RefreshToken
+            .where('access_token').equals(atok.id)
+            .setOptions({ 'multi': true })
+            .update({'active': false}, function (err) {
+              cb(err);
+            });
+        }
+
+      ], function (err)
+      {
+        if (err) return next(err);
+
+        res.end();
+        next();
+      });
+    }
+  );
 
 
   /**
@@ -153,7 +224,7 @@ module.exports = function (server) {
 
       /* Hash the password */
       function (user, cb) {
-        bcrypt.genSalt(12, function (err, salt) {
+        bcrypt.genSalt(config.security.rounds, function (err, salt) {
           if (err) {
             return cb(err);
           }
@@ -247,6 +318,7 @@ module.exports = function (server) {
 
     async.waterfall([
       function (cb) {
+        winston.debug('Received login attempt (%s)', body.credentials.type);
         cb(null, body.application_id);
       },
 
@@ -264,6 +336,7 @@ module.exports = function (server) {
           /* Login with email+password */
           case 'password':
             var lmk = body.credentials.email;
+            winston.debug('Passord login (%s)', lmk);
 
             async.waterfall([
               // Find a login method with the given user id
@@ -296,7 +369,6 @@ module.exports = function (server) {
                     return icb(new errors.InvalidEmailOrPasswordError());
                   }
 
-
                   return icb(null, lm.user);
                 });
               }
@@ -313,6 +385,8 @@ module.exports = function (server) {
           
           /* Login using a refresh token */
           case 'refresh':
+            winston.debug('Refresh login (%s)', body.credentials.refresh_token);
+
             async.waterfall([
               // Find the refresh token
               function (icb) {
@@ -331,10 +405,9 @@ module.exports = function (server) {
 
               // Check that everything is OK (appid, devid, expiration, active)
               function (rtok, icb) {
-                var expires = rtok.expires.getTime();
-
-                if (!rtok.active 
-                 || expires < Date.now
+                if (!rtok
+                 || !rtok.active 
+                 || rtok.expires.getTime() < Date.now()
                  || rtok.application != app.id
                  || rtok.device != body.device_id
                 ) {
@@ -371,13 +444,34 @@ module.exports = function (server) {
           break;
           
           default:
+            winston.debug('Unknown login type!');
             cb(new errors.InvalidCredentialsError());
         }
       },
 
-      /* Revoke old tokens */
+      /* Revoke old access tokens */
       function (app, user, cb) {
+        winston.debug('Login OK (ID %s)', user ? user.id : 'null');
+
         AccessToken
+          .where('user').equals(user ? user.id : null)
+          .where('application').equals(app.id)
+          .where('device').equals(body.device_id)
+          .setOptions({ 'multi': true })
+          .update(
+            {'active': false },
+            function (err, count) {
+              if (err) {
+                return cb(err);
+              }
+
+              return cb(null, app, user);
+            });
+      },
+
+      /* Revoke old refresh tokens */
+      function (app, user, cb) {
+        RefreshToken
           .where('user').equals(user ? user.id : null)
           .where('application').equals(app.id)
           .where('device').equals(body.device_id)
@@ -424,10 +518,11 @@ module.exports = function (server) {
         var refExpire = now + 28 * 86400000; // 4 weeks
 
         var refToken = new RefreshToken({
-          'access_token': accToken.id,
-
           'application': accToken.application,
           'device': accToken.device,
+
+          'access_token': accToken.id,
+          'user': (user ? user.id : null),
 
           'created': now,
           'expires': refExpire

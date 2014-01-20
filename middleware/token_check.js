@@ -27,7 +27,7 @@ module.exports.tokenCheck = function (requireUser) {
 
       if (!tok
        || !tok.active
-       || tok.expires.getTime() < Date.now
+       || tok.expires.getTime() < Date.now()
        || (requireUser && !tok.user)
       ) {
         return next(new errors.InvalidAccessError());

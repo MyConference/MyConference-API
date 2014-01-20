@@ -7,6 +7,7 @@ var refreshTokenSchema = mongoose.Schema({
   '_id':          { 'type': String, 'default': uuid.v4, 'index': true },
   'active':       { 'type': Boolean, 'default': true },
 
+  'user':         { 'type': String, 'ref': 'User' },
   'access_token': { 'type': String, 'ref': 'AccessToken' },
   'application':  { 'type': String, 'ref': 'Application' },
   'device':       String,
