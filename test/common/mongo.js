@@ -1,6 +1,5 @@
 var async    = require('async');
 var bcrypt   = require('bcrypt');
-var mongoFs  = require('mongodb-fs');
 var uuid     = require('node-uuid');
 var mongoose = require('mongoose');
 
