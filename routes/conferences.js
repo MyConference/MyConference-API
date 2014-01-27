@@ -30,7 +30,9 @@ module.exports = function (server) {
         Conference
           .findById(req.params.uuid)
           .populate('documents')
-          .populate('users')
+          .populate('users.owner')
+          .populate('users.collaborator')
+          .populate('users.assistant')
           .exec(function (err, conf)
         {
           if (err) {
@@ -65,8 +67,12 @@ module.exports = function (server) {
       var repr;
       if (perms) {
         repr = conf.toFullRepr();
+
       } else {
         repr = conf.toSimpleRepr();
+        repr.documents = conf.documents.map(function (doc) {
+          return doc.toMicroRepr();
+        });
       }
 
       res.send(repr);

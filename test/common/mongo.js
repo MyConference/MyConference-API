@@ -41,6 +41,13 @@ values.expiredRefresh = uuid.v4();
 values.expiredAppId = values.applicationId;
 values.expiredDeviceId = uuid.v4();
 
+values.regularConference = uuid.v4();
+values.regularConferenceName = 'Big Important Conference';
+values.regularConferenceDescription = 'A really big, really important conference';
+
+values.assistant = values.loggedUser;
+values.assistantAccess = values.loggedAccess;
+
 /* Mocks */
 var mocks = function (done) {
   var objs = [];
@@ -181,6 +188,22 @@ var mocks = function (done) {
 
     'created': Date.now() - 15000,
     'expires': Date.now() - 10000
+  }));
+
+
+
+  /* Conferences */
+
+  objs.push(new Conference({
+    '_id': values.regularConference,
+    'name': values.regularConferenceName,
+    'description': values.regularConferenceDescription,
+
+    'users.owner': [],
+    'users.collaborator': [],
+    'users.assistant': [values.assistant],
+
+    'documents': []
   }));
 
 

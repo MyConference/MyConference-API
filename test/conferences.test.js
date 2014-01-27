@@ -14,10 +14,49 @@ var User = require('../models/user.js');
 
 describe('Conferences', function () {
 
-  it('should show individual conferences with full data');
+  it('should show individual conferences with simplified data for non-assistants', function (done) {
+    client.get({
+      'path': '/conferences/' + mongo.values.regularConference,
+      'headers': {'authorization': 'Token ' + mongo.values.anonAccess}
+    }, function (err, req, res, obj) {
+      if (err) return done(err);
+
+      expect(obj).to.be.ok;
+      expect(obj.id).to.equal(mongo.values.regularConference);
+      expect(obj.name).to.equal(mongo.values.regularConferenceName);
+      expect(obj.description).to.equal(mongo.values.regularConferenceDescription);
+
+      expect(obj.users).to.not.be.ok;
+      expect(obj.documents).to.be.a('array');
+
+      done();
+    });
+  });
+
+  it('should show individual conferences with full data for assintants', function (done) {
+    client.get({
+      'path': '/conferences/' + mongo.values.regularConference,
+      'headers': {'authorization': 'Token ' + mongo.values.assistantAccess}
+    }, function (err, req, res, obj) {
+      if (err) return done(err);
+
+      expect(obj).to.be.ok;
+      expect(obj.id).to.equal(mongo.values.regularConference);
+      expect(obj.name).to.equal(mongo.values.regularConferenceName);
+      expect(obj.description).to.equal(mongo.values.regularConferenceDescription);
+
+      expect(obj.users).to.be.a('array');
+
+      expect(obj.documents).to.be.a('array');
+
+      done();
+    });
+  });
 
 
-  it('should list all available documents');
+  it('should list all available documents', function (done) {
+    
+  });
 
 
   describe('Creating', function () {
