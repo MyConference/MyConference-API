@@ -33,7 +33,7 @@ describe('Conferences', function () {
     });
   });
 
-  it('should show individual conferences with full data for assintants', function (done) {
+  it('should show individual conferences with full data for assistants', function (done) {
     client.get({
       'path': '/conferences/' + mongo.values.regularConference,
       'headers': {'authorization': 'Token ' + mongo.values.assistantAccess}
@@ -46,7 +46,6 @@ describe('Conferences', function () {
       expect(obj.description).to.equal(mongo.values.regularConferenceDescription);
 
       expect(obj.users).to.be.a('array');
-
       expect(obj.documents).to.be.a('array');
 
       done();
@@ -54,9 +53,7 @@ describe('Conferences', function () {
   });
 
 
-  it('should list all available documents', function (done) {
-    
-  });
+  it('should list all available documents');
 
 
   describe('Creating', function () {

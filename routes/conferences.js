@@ -51,7 +51,7 @@ module.exports = function (server) {
       function (conf, cb) {
 
         // Check the user appears on the list of users for the conference
-        var perms = conf.get('users.all').some(function (user) {
+        var perms = req.user && conf.get('users.all').some(function (user) {
           return user.id == req.user.id;
         });
 
