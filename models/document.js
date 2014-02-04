@@ -40,8 +40,12 @@ documentSchema.methods.toSimpleRepr = function () {
 };
 
 documentSchema.methods.toFullRepr = function () {
-  var repr = this.toFullRepr();
-  repr.conference = this.conference;
+  var repr = this.toSimpleRepr();
+
+  repr.conference = (typeof this.conference === 'string')
+    ? mongoose.model('Conference').getMicroRepr(this.conference)
+    : this.conference.toSimpleRepr();
+
   return repr;
 };
 

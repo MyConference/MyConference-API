@@ -73,7 +73,7 @@ var commands = {
 
   'request': function (rl, args, cb) {
     if (args.length != 2 && args.length != 3) {
-      winston.error('login expects 2 or 3 arguments, %d given', args.length);
+      winston.error('request expects 2 or 3 arguments, %d given', args.length);
     }
 
     var method = args[0].toUpperCase();

@@ -10,9 +10,9 @@ var conferenceSchema = mongoose.Schema({
   'description': {'type': String, 'default': ''},
 
   'users': {
-  	'owner':        {'type': [String], 'default': [], 'ref': 'User'},
-  	'collaborator': {'type': [String], 'default': [], 'ref': 'User'},
-  	'assistant':    {'type': [String], 'default': [], 'ref': 'User'},
+  	'owner':        [{'type': String, 'default': [], 'ref': 'User'}],
+  	'collaborator': [{'type': String, 'default': [], 'ref': 'User'}],
+  	'assistant':    [{'type': String, 'default': [], 'ref': 'User'}],
   },
 
   'documents': {'type': [String], 'default': [], 'ref': 'Document'}

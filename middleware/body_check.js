@@ -96,7 +96,9 @@ module.exports.bodyCheck = function (bodySchema) {
   return function (req, res, next) {
     checkObjectSchema(bodySchema, req.body, function (err) {
       if (err) {
-        next(new errors.InvalidBodyError());
+        var exc = new errors.InvalidBodyError();
+        exc.message = err;
+        return next(exc);
       }
 
       next(null);

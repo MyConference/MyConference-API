@@ -8,6 +8,7 @@ var conf = require('../config.js');
 var LoginMethod = require('../models/login_method.js');
 var User        = require('../models/user.js')
 var Conference  = require('../models/conference.js');
+var Document    = require('../models/document.js');
 
 /* Setup Winston logger */
 winston.clear();
@@ -56,12 +57,10 @@ async.parallel([
 
   /* Check every login method is associated with an existing user */
   function (cb) {
-    winston.debug('Starting LoginMethod check...');
     var stream = LoginMethod.find().stream();
 
     // For every login method...
     stream.on('data', function (lm) {
-      winston.debug('Processing LoginMethod %s', lm.id);
       if (!lm.user) {
         winston.warn('Login Method "%s" doesn\'t refer to a user', lm.id);
         lm.remove(onRemove());
@@ -80,13 +79,11 @@ async.parallel([
     });
 
     stream.on('error', function (err) {
-      winston.debug('Finished LoginMethod check');
       stream.removeAllListeners();
       cb(err);
     });
 
     stream.on('close', function () {
-      winston.debug('Finished Conference check');
       stream.removeAllListeners();
       cb(null);
     });
@@ -94,12 +91,11 @@ async.parallel([
 
   /* Check for every conference that has an user, the user has the conference */
   function (cb) {
-    winston.debug('Starting Conference check...');
     var stream = Conference.find().stream();
 
     // For every login conference...
     stream.on('data', function (conf) {
-      winston.debug('Processing Conference %s', conf.id);
+
       var userobjs = conf.toFullRepr().users;
       userobjs.forEach(function (userobj) {
         User.findById(userobj.id).exec(function (err, user) {
@@ -123,21 +119,45 @@ async.parallel([
     });
 
     stream.on('close', function () {
-      winston.debug('Finished Conference check');
+      stream.removeAllListeners();
+      cb(null);
+    });
+  },
+
+  /* Check for every document that its conference has it listed as document */
+  function (cb) {
+    var stream = Document.find().stream();
+
+    stream.on('data', function (doc) {
+
+      Conference.findById(doc.conference).exec(function (err, conf) {
+        if (err) return cb(err);
+
+        if (conf.documents.indexOf(doc.id) < 0) {
+          winston.warn('Document %s belongs to Conference %s, but conference does not list it', doc.id, conf.id);
+          conf.documents.push(doc.id);
+          conf.save(onSave());
+        }
+      })
+    });
+
+    stream.on('error', function (err) {
+      stream.removeAllListeners();
+      cb(err);
+    });
+
+    stream.on('close', function () {
       stream.removeAllListeners();
       cb(null);
     });
   }
 
 ], function (err, results) {
-  winston.debug('Finished processing');
-
   if (err) {
     winston.error(err);
   }
 
   setTimeout(function () {
-    winston.debug('Closing Mongoose connection...');
     mongoose.connection.close();
   }, 3000);
 });

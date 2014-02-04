@@ -2,7 +2,7 @@ var async = require('async');
 var mongoose = require('mongoose');
 var restify = require('restify');
 var winston = require('winston');
-var conf = require('../config.js');
+var config = require('../config.js');
 
 /* Models */
 var LoginMethod = mongoose.model('LoginMethod');
@@ -49,8 +49,9 @@ module.exports = function (server) {
 
       /* Get the rights for the current user */
       function (conf, cb) {
+
         // Check the user appears on the list of users for the conference
-        var perms = conf.users.all.some(function (user) {
+        var perms = conf.get('users.all').some(function (user) {
           return user.id == req.user.id;
         });
 
