@@ -30,6 +30,7 @@ module.exports = function (server) {
         Conference
           .findById(req.params.uuid)
           .populate('documents')
+          .populate('venues')
           .populate('users.owner')
           .populate('users.collaborator')
           .populate('users.assistant')
