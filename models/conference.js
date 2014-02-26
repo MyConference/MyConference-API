@@ -15,8 +15,9 @@ var conferenceSchema = mongoose.Schema({
   	'assistant':    [{'type': String, 'default': [], 'ref': 'User'}],
   },
 
-  'documents': [{'type': String, 'default': [], 'ref': 'Document'}],
-  'venues':    [{'type': String, 'default': [], 'ref': 'Venue'}]
+  'documents':     [{'type': String, 'default': [], 'ref': 'Document'}],
+  'venues':        [{'type': String, 'default': [], 'ref': 'Venue'}],
+  'announcements': [{'type': String, 'default': [], 'ref': 'Announcement'}]
 });
 
 conferenceSchema.virtual('uri').get(function () {
@@ -66,6 +67,15 @@ conferenceSchema.methods.toFullRepr = function () {
   repr.venues = this.venues.map(function (venue, idx) {
     if (typeof venue === 'string') {
       return mongoose.model('Venue').getMicroRepr(venue);
+    } else {
+      return venue.toSimpleRepr();
+    }
+  });
+
+  // Put all announcements
+  repr.announcements = this.venues.map(function (venue, idx) {
+    if (typeof venue === 'string') {
+      return mongoose.model('Announcement').getMicroRepr(venue);
     } else {
       return venue.toSimpleRepr();
     }

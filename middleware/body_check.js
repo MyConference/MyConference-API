@@ -8,6 +8,10 @@ function matchType (object, type) {
   } else if (type === String) {
     return (typeof object === 'string');
 
+  } else if (type === Date) {
+    return (typeof object === 'string')
+        && object.match(/^(\d{4}\-\d\d\-\d\d([tT][\d:\.]*)?)([zZ]|([+\-])(\d\d):?(\d\d))?$/);
+
   } else if (type === Number) {
     return (typeof object === 'number');
 
