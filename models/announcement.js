@@ -26,13 +26,13 @@ announcementSchema.statics.getMicroRepr = function (id) {
 };
 
 announcementSchema.methods.toMicroRepr = function () {
-  return mongoose.model('Venue').getMicroRepr(this.id);
+  return mongoose.model('Announcement').getMicroRepr(this.id);
 };
 
 announcementSchema.methods.toSimpleRepr = function () {
   var repr = this.toMicroRepr();
 
-  repr.title = this.name;
+  repr.title = this.title;
   repr.body = this.body;
   repr.date = this.date.toISOString();
 

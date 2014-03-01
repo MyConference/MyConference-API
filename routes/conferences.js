@@ -31,6 +31,7 @@ module.exports = function (server) {
           .findById(req.params.uuid)
           .populate('documents')
           .populate('venues')
+          .populate('announcements')
           .populate('users.owner')
           .populate('users.collaborator')
           .populate('users.assistant')
@@ -72,8 +73,17 @@ module.exports = function (server) {
 
       } else {
         repr = conf.toSimpleRepr();
+
         repr.documents = conf.documents.map(function (doc) {
           return doc.toMicroRepr();
+        });
+
+        repr.venues = conf.venues.map(function (venue) {
+          return venue.toMicroRepr();
+        });
+
+        repr.announcements = conf.announcements.map(function (ann) {
+          return ann.toMicroRepr();
         });
       }
 

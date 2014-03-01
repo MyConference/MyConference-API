@@ -18,7 +18,7 @@ var errors = require('../errors.js');
 
 module.exports = function (server) {
 
-  server.get('/announcement/:uuid',
+  server.get('/announcements/:uuid',
     /* Token check */
     tokenCheck(false),
 
@@ -98,7 +98,7 @@ module.exports = function (server) {
           if (err) return cb(err);
 
           if (!conf) {
-            return cb(new restify.NotFoundError());
+            return cb(new restify.NotFoundError('conference nor found'));
           }
 
           cb(null, conf);
@@ -129,7 +129,7 @@ module.exports = function (server) {
           'body': req.body.body,
           'date': new Date(req.body.date),
 
-          'conference':  conf.id
+          'conference': conf.id
         });
 
         announcement.save(function (err) {

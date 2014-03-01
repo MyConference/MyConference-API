@@ -75,6 +75,13 @@ Server.prototype.createServer = function () {
     require("./routes/" + file)(server);
   });
 
+  // List all routes
+  for (m in server.router.mounts) {
+    var mount = server.router.mounts[m];
+
+    winston.debug('Route: %s %s', mount.method, mount.spec.path);
+  }
+
   this.server = server;
 }
 

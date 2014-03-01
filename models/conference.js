@@ -73,11 +73,11 @@ conferenceSchema.methods.toFullRepr = function () {
   });
 
   // Put all announcements
-  repr.announcements = this.venues.map(function (venue, idx) {
-    if (typeof venue === 'string') {
-      return mongoose.model('Announcement').getMicroRepr(venue);
+  repr.announcements = this.venues.map(function (announcement, idx) {
+    if (typeof announcement === 'string') {
+      return mongoose.model('Announcement').getMicroRepr(announcement);
     } else {
-      return venue.toSimpleRepr();
+      return announcement.toSimpleRepr();
     }
   });
 
