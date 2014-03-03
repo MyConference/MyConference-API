@@ -62,6 +62,16 @@ Server.prototype.createServer = function () {
     winston.info(str);
   });
 
+  server.on('uncaughtException', function (req, res, route, err) {
+    var str = '\033[97m' + req.method + '\033[m';
+    str += ' ' + req.url;
+    str += ' \033[31m' + stcod + '\033[m';
+    str += ' \033[31m' + (err.constructor.name) + '\033[m';
+
+    winston.info(str);
+    res.send(new restify.InternalError());
+  });
+
   server.use(restify.bodyParser({ mapParams: false }));
 
   server.use(function (req, res, next) {

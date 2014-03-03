@@ -5,9 +5,12 @@ var winston = require('winston');
 var config = require('../config.js');
 
 /* Models */
-var LoginMethod = mongoose.model('LoginMethod');
-var User        = mongoose.model('User');
-var Conference  = mongoose.model('Conference');
+var LoginMethod   = mongoose.model('LoginMethod');
+var User          = mongoose.model('User');
+var Conference    = mongoose.model('Conference');
+var Document      = mongoose.model('Document');
+var Venue         = mongoose.model('Venue');
+var Announcement  = mongoose.model('Announcement');
 
 /* Middleware */
 var bodyCheck = require('../middleware/body_check.js').bodyCheck;
@@ -42,7 +45,7 @@ module.exports = function (server) {
           }
 
           if (!conf) {
-            return cb(new restify.NotFountError());
+            return cb(new restify.NotFountError('conference not found'));
           }
 
           cb(null, conf);
@@ -163,4 +166,75 @@ module.exports = function (server) {
       });
   });
 
+
+  server.del('/conferences/:uuid',
+    /* Token check */
+    tokenCheck(true),
+
+    /* Actual code */
+    function (req, res, next)
+    {
+      async.waterfall([
+
+      /* Get the conference */
+      function (cb) {
+        Conference
+        .findById(req.params.uuid)
+        .exec(function (err, conf) {
+          if (err) return cb(err);
+
+          if (!conf) {
+            return cb(new restify.NotFoundError('conference not found'));
+          }
+
+          cb(null, conf);
+        });
+      },
+
+      /* Check the user has rights to remove the conference */
+      function (conf, cb) {
+        var perms = []
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to remove conference'));
+        }
+
+        cb(null, conf);
+      },
+
+      /* The funny part: Remove everything that's linked to the conference */
+      function (conf, cb) {
+        var actions = [];
+
+        async.parallel([
+          function (icb) {
+            Document.find({'_id': {'$in': conf.documents}}).remove().exec(icb);
+          },
+          function (icb) {
+            Venue.find({'_id': {'$in': conf.venues}}).remove().exec(icb);
+          },
+          function (icb) {
+            Announcement.find({'_id': {'$in': conf.announcements}}).remove().exec(icb);
+          }
+        ], cb);
+      },
+
+      /* Actually delete the conference */
+      function (conf, cb) {
+        Conference.findById(conf.id).remove().exec(cb);
+      }
+
+    ], function (err) {
+        if (err) return next(err);
+
+        res.send('ok');
+        return next();
+      });
+    }
+  );
 };
