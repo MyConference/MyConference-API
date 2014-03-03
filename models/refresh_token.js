@@ -1,10 +1,10 @@
 var mongoose = require('mongoose');
-var uuid = require('node-uuid');
+var dbid = require('../util/dbid.js');
 
 var ObjectID = mongoose.Schema.Types.ObjectId;
 
 var refreshTokenSchema = mongoose.Schema({
-  '_id':          { 'type': String, 'default': uuid.v4, 'index': true },
+  '_id':          { 'type': String, 'default': dbid, 'index': true },
   'active':       { 'type': Boolean, 'default': true },
 
   'user':         { 'type': String, 'ref': 'User' },

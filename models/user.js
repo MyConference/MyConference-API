@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
-var uuid = require('node-uuid');
+var dbid = require('../util/dbid.js');
 
 
 var roles = ['owner', 'collaborator', 'assistant'];
 
 var userSchema = mongoose.Schema({
-  '_id': { 'type': String, 'default': uuid.v4 },
+  '_id': { 'type': String, 'default': dbid },
 
   'conferences': {
   	'owner':        [{'type': String, 'default': [], 'ref': 'Conference' }],

@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
-var uuid = require('node-uuid');
+var dbid = require('../util/dbid.js');
 
 var ObjectID = mongoose.Schema.Types.ObjectId;
 var Mixed = mongoose.Schema.Types.Mixed;
 
 var announcementSchema = mongoose.Schema({
-  '_id':  { 'type': String, 'default': uuid.v4 },
+  '_id':  { 'type': String, 'default': dbid },
 
   'title': {'type': String, 'default': ""},
   'body':  {'type': String, 'default': ""},
