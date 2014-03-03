@@ -52,6 +52,7 @@ Server.prototype.createServer = function () {
 
     if (err) {
       str += ' \033[31m' + (err.constructor.name) + '\033[m';
+      winston.error(err);
     }
 
     var ctsize = res.headers['Content-Length']

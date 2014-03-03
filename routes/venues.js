@@ -85,6 +85,11 @@ module.exports = function (server) {
               'type': Number
             }
           }
+        },
+
+        /* Details of thevenue */
+        'details': {
+          'type': String
         }
 
       }
