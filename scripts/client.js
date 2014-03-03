@@ -58,6 +58,10 @@ var commands = {
         return cb(err);
       }
 
+      if (!obj.user) {
+        return cb('user is null!');
+      }
+
       winston.info('Login successful');
       winston.data(obj);
       
@@ -99,7 +103,7 @@ var commands = {
 
     fun(function (err, req, res, obj) {
       if (err) {
-        winston.error('Error in request: %s', res.statusCode, obj);
+        winston.error('Error in request: %s', res ? res.statusCode : null, obj);
         return cb();
       }
 
