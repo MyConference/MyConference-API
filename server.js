@@ -30,6 +30,7 @@ Server.prototype.createServer = function () {
   // Global middleware
   //server.use(restify.logger());
   server.on('after', function (req, res, route, err) {
+    var time = Date.now() - req.time;
     var stcod = res.statusCode;
 
     var color;
@@ -49,10 +50,12 @@ Server.prototype.createServer = function () {
     var str = '\033[97m' + req.method + '\033[m';
     str += ' ' + req.url;
     str += ' \033[' + color + 'm' + stcod + '\033[m';
+    str += ' \033[90m' + time + 'ms' + '\033[m';
 
     if (err) {
       str += ' \033[31m' + (err.constructor.name) + '\033[m';
     }
+
 
     var ctsize = res.headers['Content-Length']
     if (typeof ctsize !== 'undefined') {
@@ -72,12 +75,13 @@ Server.prototype.createServer = function () {
     res.send(new restify.InternalError());
   });
 
-  server.use(restify.bodyParser({ mapParams: false }));
-
   server.use(function (req, res, next) {
     req.baseUri = conf.http.proto + '://' + req.header('host');
+    req.time = Date.now();
     next();
   });
+
+  server.use(restify.bodyParser({ mapParams: false }));
 
   // Routes
   fs.readdirSync("./routes").forEach(function (file) {
