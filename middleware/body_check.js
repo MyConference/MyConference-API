@@ -31,6 +31,10 @@ function matchType (object, type) {
 
 
 function checkObjectSchema (schema, object, cb) {
+  if (!object && schema.optional) {
+    return cb(null);
+  }
+
   // Get list of allowed types
   var type = schema.type;
   if (!(type instanceof Array)) {
@@ -85,7 +89,7 @@ function checkObjectSchema (schema, object, cb) {
           return cb(err);
         }
 
-        return cb();
+        return cb(null);
       });
     }, cb);
 

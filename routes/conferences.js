@@ -112,6 +112,12 @@ module.exports = function (server) {
         /* Description of the conference */
         'description': {
           'type': String
+        },
+
+        /* CSS class name of the conference */
+        'css': {
+          'type': String,
+          'optional': true
         }
       }
     }),

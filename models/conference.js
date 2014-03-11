@@ -9,6 +9,8 @@ var conferenceSchema = mongoose.Schema({
   'name':        {'type': String},
   'description': {'type': String, 'default': ''},
 
+  'css':         {'type': String, 'default': ''},
+
   'users': {
   	'owner':        [{'type': String, 'default': [], 'ref': 'User'}],
   	'collaborator': [{'type': String, 'default': [], 'ref': 'User'}],
@@ -48,6 +50,7 @@ conferenceSchema.methods.toSimpleRepr = function () {
   var repr = this.toMicroRepr();
   repr.name = this.name;
   repr.description = this.description;
+  repr.css = this.css;
   return repr;
 }
 
