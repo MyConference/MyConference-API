@@ -112,6 +112,12 @@ module.exports = function (server) {
         /* Description of the conference */
         'description': {
           'type': String
+        },
+
+        /* CSS class name of the conference */
+        'css': {
+          'type': String,
+          'optional': true
         }
       }
     }),
@@ -221,7 +227,11 @@ module.exports = function (server) {
           function (icb) {
             Announcement.find({'_id': {'$in': conf.announcements}}).remove().exec(icb);
           }
-        ], cb);
+        ], function (err) {
+          if (err) return cb(err);
+
+          cb(null, conf);
+        });
       },
 
       /* Actually delete the conference */
@@ -232,7 +242,7 @@ module.exports = function (server) {
     ], function (err) {
         if (err) return next(err);
 
-        res.send('ok');
+        res.end();
         return next();
       });
     }
