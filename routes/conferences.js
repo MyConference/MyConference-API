@@ -35,6 +35,8 @@ module.exports = function (server) {
           .populate('documents')
           .populate('venues')
           .populate('announcements')
+          .populate('organizers')
+          .populate('speakers')
           .populate('users.owner')
           .populate('users.collaborator')
           .populate('users.assistant')
