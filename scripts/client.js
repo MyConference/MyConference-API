@@ -188,6 +188,7 @@ Application.findOne({'name': '$SCRIPT$'}).exec(function (err, app) {
 
   winston.debug('Found app id: %s', app.id);
   winston.info('Using device id: %s', session.device);
+  winston.info('Sending requests to: %s', conf.http.host);
 
   askLine();
 });

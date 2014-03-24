@@ -19,7 +19,9 @@ var conferenceSchema = mongoose.Schema({
 
   'documents':     [{'type': String, 'default': [], 'ref': 'Document'}],
   'venues':        [{'type': String, 'default': [], 'ref': 'Venue'}],
-  'announcements': [{'type': String, 'default': [], 'ref': 'Announcement'}]
+  'announcements': [{'type': String, 'default': [], 'ref': 'Announcement'}],
+  'organizers':    [{'type': String, 'default': [], 'ref': 'Organizer'}],
+  'speakers':      [{'type': String, 'default': [], 'ref': 'Speaker'}]
 });
 
 conferenceSchema.virtual('uri').get(function () {
@@ -81,6 +83,24 @@ conferenceSchema.methods.toFullRepr = function () {
       return mongoose.model('Announcement').getMicroRepr(announcement);
     } else {
       return announcement.toSimpleRepr();
+    }
+  });
+
+  // Put all organizers
+  repr.organizers = this.organizers.map(function (organizer, idx) {
+    if (typeof organizer === 'string') {
+      return mongoose.model('Organizer').getMicroRepr(organizer);
+    } else {
+      return organizer.toSimpleRepr();
+    }
+  });
+
+  // Put all speakers
+  repr.speakers = this.speakers.map(function (speaker, idx) {
+    if (typeof speaker === 'string') {
+      return mongoose.model('Speaker').getMicroRepr(speaker);
+    } else {
+      return speaker.toSimpleRepr();
     }
   });
 

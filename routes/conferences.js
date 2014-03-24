@@ -173,6 +173,9 @@ module.exports = function (server) {
   });
 
 
+
+
+
   server.del('/conferences/:uuid',
     /* Token check */
     tokenCheck(true),
