@@ -120,7 +120,7 @@ module.exports = function (server) {
 
       /* Create and save the spkr */
       function (conf, cb) {
-        var spkr = new Document({
+        var spkr = new Speaker({
           'name':        req.body.name,
           'charge':      req.body.charge,
           'origin':      req.body.origin,

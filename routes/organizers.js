@@ -128,7 +128,7 @@ module.exports = function (server) {
 
       /* Create and save the org */
       function (conf, cb) {
-        var org = new Document({
+        var org = new Organizer({
           'name':    req.body.name,
           'origin':  req.body.origin,
           'details': req.body.details,
