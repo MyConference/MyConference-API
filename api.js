@@ -16,11 +16,7 @@ var conf = require('./config.js');
 winston.clear();
 winston.cli();
 winston.add(winston.transports.Console, {
-  'timestamp': !conf.debug ? false : function () {
-    var date = new Date();
-    return sprintf('\033[90m%02d:%02d:%02d.%03d\033[m',
-      date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
-  },
+  'timestamp': false,
   'prettyPrint': true,
   'colorize': conf.debug,
   'level': conf.test ? 'warn' : conf.debug ? 'debug' : 'info'
