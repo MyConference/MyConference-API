@@ -439,8 +439,7 @@ module.exports = function (server) {
           break;
           
           case 'thirdparty':
-            //fn(body.credentials, cb); 
-            cb('not-implemented');
+            
           break;
           
           default:

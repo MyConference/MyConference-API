@@ -19,7 +19,34 @@ var inviteCodeSchema = mongoose.Schema({
   'conference':  { 'type': String, 'ref': 'Conference' }
 });
 
-// Index on the three fields used for token invalidation at login
-inviteCodeSchema.index({'user': 1, 'application': 1, 'device': 1});
+inviteCodeSchema.virtual('uri').get(function () {
+  return '/invite-codes/' + this.id;
+});
+
+inviteCodeSchema.statics.getMicroRepr = function (id) {
+  return {
+    'id':  id,
+    'uri': '/invite-codes/' + id
+  }
+};
+
+inviteCodeSchema.methods.toMicroRepr = function () {
+  return mongoose.model('InviteCode').getMicroRepr(this.id);
+};
+
+inviteCodeSchema.methods.toSimpleRepr = function () {
+  var repr = this.toMicroRepr();
+  return repr;
+};
+
+inviteCodeSchema.methods.toFullRepr = function () {
+  var repr = this.toSimpleRepr();
+
+  repr.conference = (typeof this.conference === 'string')
+    ? mongoose.model('Conference').getMicroRepr(this.conference)
+    : this.conference.toSimpleRepr();
+
+  return repr;
+};
 
 module.exports = mongoose.model('InviteCode', inviteCodeSchema);

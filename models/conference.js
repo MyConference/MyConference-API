@@ -21,7 +21,9 @@ var conferenceSchema = mongoose.Schema({
   'venues':        [{'type': String, 'default': [], 'ref': 'Venue'}],
   'announcements': [{'type': String, 'default': [], 'ref': 'Announcement'}],
   'organizers':    [{'type': String, 'default': [], 'ref': 'Organizer'}],
-  'speakers':      [{'type': String, 'default': [], 'ref': 'Speaker'}]
+  'speakers':      [{'type': String, 'default': [], 'ref': 'Speaker'}],
+
+  'invite_codes':  [{'type': String, 'default': [], 'ref': 'InviteCode'}]
 });
 
 conferenceSchema.virtual('uri').get(function () {

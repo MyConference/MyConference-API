@@ -38,4 +38,6 @@ module.exports = {
   'InvalidCredentialsError':     error(409, 'InvalidCredentials', 'invalid_credentials'),
   'InvalidPasswordError':        error(409, 'InvalidPassword', 'invalid_password'),
   'InvalidEmailError':           error(409, 'InvalidEmail', 'invalid_email'),
+
+  'InvalidInviteCodeError':      error(409, 'InvalidInviteCode', 'invalid_invite_code')
 };
