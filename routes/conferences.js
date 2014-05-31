@@ -97,11 +97,13 @@ module.exports = function (server) {
       }
 
       var userRole = null;
-      repr.users.each(function (user) {
-        if (user.id == req.user.id) {
-          userRole = user.role;
-        }
-      });
+      if (repr.users) {
+        repr.users.each(function (user) {
+          if (user.id == req.user.id) {
+            userRole = user.role;
+          }
+        });
+      }
 
       res.send(repr);
       next();
