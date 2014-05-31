@@ -77,6 +77,10 @@ module.exports = function (server) {
 
         'description': {
           'type': String
+        },
+
+        'picture_url': {
+          'type': String
         }
       }
     }),
@@ -125,9 +129,12 @@ module.exports = function (server) {
           'charge':      req.body.charge,
           'origin':      req.body.origin,
           'description': req.body.description,
+          'picture_url': req.body.picture_url,
 
           'conference':  conf.id
         });
+
+        console.log(req.body.picture_url);
 
         spkr.save(function (err) {
           if (err) return cb(err);

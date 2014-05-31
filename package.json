@@ -1,41 +1,36 @@
 {
-	"name": "myconference-api",
+  "name": "myconference-api",
   "description": "API for MyConference",
   "version": "0.1.0",
-
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/MyConference/MyConference-API.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MyConference/MyConference-API.git"
   },
-
   "main": "api.js",
-
   "scripts": {
     "start": "node api.js",
-    "test":  "NODE_ENV=test MONGO_URI='mongodb://localhost/myconference-testing' node_modules/.bin/mocha --reporter spec --ui bdd"
+    "test": "NODE_ENV=test MONGO_URI='mongodb://localhost/myconference-testing' node_modules/.bin/mocha --reporter spec --ui bdd"
   },
-
   "engines": {
     "node": "~0.10"
   },
-
   "dependencies": {
-    "async":           "~0.9.0",
-    "bcrypt":          "~0.7.8",
-    "mongoose":        "~3.8.11",
-    "mandrill-api":    "~1.0.39",
-    "node-uuid":       "~1.4.1",
-    "passport":        "~0.2.0",
-    "passport-google": "~0.3.0",
-    "restify":         "~2.8.1",
-    "sprintf":         "~0.1.3",
-    "underscore":      "~1.6.0",
-    "validator":       "~3.12.0",
-    "winston":         "~0.7.2"
+    "async": "^0.9.0",
+    "bcrypt": "^0.7.8",
+    "mandrill-api": "^1.0.39",
+    "mongoose": "^3.8.11",
+    "node-transloadit": "^0.0.4",
+    "node-uuid": "^1.4.1",
+    "passport": "^0.2.0",
+    "passport-google": "^0.3.0",
+    "restify": "^2.8.1",
+    "sprintf": "^0.1.3",
+    "underscore": "^1.6.0",
+    "validator": "^3.12.0",
+    "winston": "^0.7.2"
   },
-
   "devDependencies": {
-    "chai":       "~1.9.1",
-    "mocha":      "~1.19.0"
+    "chai": "^1.9.1",
+    "mocha": "^1.19.0"
   }
 }

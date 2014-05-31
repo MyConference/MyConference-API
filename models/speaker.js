@@ -11,6 +11,7 @@ var speakerSchema = mongoose.Schema({
   'charge':      {'type': String, 'default': ''},
   'origin':      {'type': String, 'default': ''},
   'description': {'type': String, 'default': ''},
+  'picture_url': {'type': String, 'default': ''},
 
   'conference':  {'type': String, 'ref': 'Conference'}
 });
@@ -36,6 +37,7 @@ speakerSchema.methods.toSimpleRepr = function () {
   repr.charge = this.charge;
   repr.origin = this.origin;
   repr.description = this.description;
+  repr.picture_url = this.picture_url;
   return repr;
 };
 
