@@ -7,7 +7,7 @@ var config = require('../config.js');
 /* Models */
 var User        = mongoose.model('User');
 var Conference  = mongoose.model('Conference');
-var Document    = mongoose.model('Document');
+var AgendaEvent = mongoose.model('AgendaEvent');
 
 /* Middleware */
 var bodyCheck = require('../middleware/body_check.js').bodyCheck;
@@ -17,7 +17,7 @@ var errors = require('../errors.js');
 
 module.exports = function (server) {
 
-  server.get('/documents/:uuid',
+  server.get('/agenda-events/:uuid',
     /* Token check */
     tokenCheck(false),
 
@@ -28,7 +28,7 @@ module.exports = function (server) {
 
       /* Get the document */
       function (cb) {
-        Document.findById(req.params.uuid)
+        AgendaEvent.findById(req.params.uuid)
         .populate('conference')
         .exec(function (err, doc) {
           if (err) return cb(err);
@@ -52,7 +52,7 @@ module.exports = function (server) {
   });
 
 
-  server.post('/documents',
+  server.post('/agenda-events',
     /* Token check */
     tokenCheck(true),
 
@@ -77,13 +77,8 @@ module.exports = function (server) {
         },
 
         /* Document data type */
-        'type': {
-          'type': String
-        },
-
-        /* Document data */
-        'data': {
-          'type': null
+        'date': {
+          'type': Date
         }
       }
     }),
@@ -127,11 +122,10 @@ module.exports = function (server) {
 
       /* Create and save the doc */
       function (conf, cb) {
-        var doc = new Document({
+        var doc = new AgendaEvent({
           'title':       req.body.title,
           'description': req.body.description,
-          'type':        req.body.type,
-          'data':        req.body.data,
+          'type':        req.body.date,
 
           'conference':  conf.id
         });
@@ -145,7 +139,7 @@ module.exports = function (server) {
 
       /* Update the conference to contain the doc */
       function (doc, conf, cb) {
-        conf.documents.push(doc.id);
+        conf.agendaEvents.push(doc.id);
         conf.save(function (err) {
           if (err) return cb(err);
 

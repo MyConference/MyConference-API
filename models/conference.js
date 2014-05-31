@@ -22,6 +22,7 @@ var conferenceSchema = mongoose.Schema({
   'announcements': [{'type': String, 'default': [], 'ref': 'Announcement'}],
   'organizers':    [{'type': String, 'default': [], 'ref': 'Organizer'}],
   'speakers':      [{'type': String, 'default': [], 'ref': 'Speaker'}],
+  'agendaEvents':  [{'type': String, 'default': [], 'ref': 'AgendaEvent'}],
 
   'invite_codes':  [{'type': String, 'default': [], 'ref': 'InviteCode'}]
 });

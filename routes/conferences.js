@@ -90,7 +90,18 @@ module.exports = function (server) {
         repr.announcements = conf.announcements.map(function (ann) {
           return ann.toMicroRepr();
         });
+
+        repr.agendaEvents = conf.agendaEvents.map(function (agevt) {
+          return agevt.toMicroRepr();
+        });
       }
+
+      var userRole = null;
+      repr.users.each(function (user) {
+        if (user.id == req.user.id) {
+          userRole = user.role;
+        }
+      });
 
       res.send(repr);
       next();
