@@ -137,7 +137,7 @@ module.exports = function (server) {
         var venue = new Venue({
           'name': req.body.name,
           'location': req.body.location,
-          'details': req.body.location,
+          'details': req.body.details,
 
           'conference':  conf.id
         });
