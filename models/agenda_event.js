@@ -31,7 +31,7 @@ eventSchema.methods.toMicroRepr = function () {
 
 eventSchema.methods.toSimpleRepr = function () {
   var repr = this.toMicroRepr();
-  repr.name = this.name;
+  repr.title = this.title;
   repr.description = this.description;
   repr.date = this.date;
 
