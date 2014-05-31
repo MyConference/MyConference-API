@@ -107,6 +107,14 @@ conferenceSchema.methods.toFullRepr = function () {
     }
   });
 
+  repr.agendaEvents = this.agendaEvents.map(function (agevt, idx) {
+    if (typeof agevt === 'string') {
+      return mongoose.model('AgendaEvent').getMicroRepr(agevt);
+    } else {
+      return agevt.toSimpleRepr();
+    }
+  });
+
   // Put all users
   repr.users = [];
   for (r in roles) {
