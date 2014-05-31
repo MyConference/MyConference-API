@@ -98,11 +98,12 @@ module.exports = function (server) {
 
       var userRole = null;
       if (repr.users) {
-        repr.users.each(function (user) {
+        for (var u in repr.users) {
+          var user = repr.users[u];
           if (user.id == req.user.id) {
             userRole = user.role;
           }
-        });
+        }
       }
 
       res.send(repr);
