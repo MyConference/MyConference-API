@@ -96,12 +96,12 @@ module.exports = function (server) {
         });
       }
 
-      var userRole = null;
+      repr.role = null;
       if (repr.users) {
         for (var u in repr.users) {
           var user = repr.users[u];
           if (user.id == req.user.id) {
-            userRole = user.role;
+            repr.role = user.role;
           }
         }
       }
