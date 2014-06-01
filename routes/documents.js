@@ -216,10 +216,12 @@ module.exports = function (server) {
 
       /* Remove the document */
       function (doc, cb) {
-        Document.findById(doc.id).remove().exec(cb);
+        Document.findById(doc.id).remove().exec(function (err) {
+          cb(err, doc);
+        });
       }
 
-    ], function (err) {
+    ], function (err, doc) {
       if (err) return next(err);
 
       res.end();
