@@ -162,4 +162,65 @@ module.exports = function (server) {
       next();
     });
   });
+
+  server.del('/documents/:uuid', 
+
+    tokenCheck(true),
+
+    function (req, res, next)
+  {
+    async.waterfall([
+
+      /* Obtain the document */
+      function (conf, cb) {
+        Document
+        .findById(res.params.uuid)
+        .populate('conference')
+        .exec(function (err, doc) {
+          if (err) {
+            return cb(err);
+          }
+
+          if (!doc) {
+            throw new restify.NotFoundError('document not found');
+          }
+
+          return cb(null, conf, doc);
+        });
+      },
+
+      /* Check the user has rights to remove a doc from the conf */
+      function (conf, doc, cb) {
+        var perms = []
+          .concat(conf.get('users.collaborator'))
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to edit conference'));
+        }
+
+        cb(null, conf);
+      },
+
+      /* Remove the document from the conference */
+      function (conf, doc, cb) {
+        conf.documents.remove(doc.id);
+        conf.save(cb);
+      },
+
+      /* Remove the document */
+      function (conf, doc, cb) {
+        Document.findById(doc.id).remove().exec(cb);
+      }
+    ], function (err) {
+      if (err) return next(err);
+
+      res.end();
+      return next();
+    });
+  });
 };
