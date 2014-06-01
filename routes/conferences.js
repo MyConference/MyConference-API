@@ -48,7 +48,7 @@ module.exports = function (server) {
           }
 
           if (!conf) {
-            return cb(new restify.NotFountError('conference not found'));
+            return cb(new restify.NotFoundError('conference not found'));
           }
 
           cb(null, conf);

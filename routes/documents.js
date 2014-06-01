@@ -172,9 +172,9 @@ module.exports = function (server) {
     async.waterfall([
 
       /* Obtain the document */
-      function (conf, cb) {
+      function (cb) {
         Document
-        .findById(res.params.uuid)
+        .findById(req.params.uuid)
         .populate('conference')
         .exec(function (err, doc) {
           if (err) {
@@ -185,7 +185,7 @@ module.exports = function (server) {
             throw new restify.NotFoundError('document not found');
           }
 
-          return cb(null, conf, doc);
+          return cb(null, doc.conference, doc);
         });
       },
 
@@ -203,19 +203,22 @@ module.exports = function (server) {
           return cb(new restify.ForbiddenError('not allowed to edit conference'));
         }
 
-        cb(null, conf);
+        cb(null, conf, doc);
       },
 
       /* Remove the document from the conference */
       function (conf, doc, cb) {
         conf.documents.remove(doc.id);
-        conf.save(cb);
+        conf.save(function (err) {
+          cb(err, doc);
+        });
       },
 
       /* Remove the document */
-      function (conf, doc, cb) {
+      function (doc, cb) {
         Document.findById(doc.id).remove().exec(cb);
       }
+
     ], function (err) {
       if (err) return next(err);
 
