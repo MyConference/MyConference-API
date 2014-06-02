@@ -162,4 +162,71 @@ module.exports = function (server) {
       next();
     });
   });
+
+
+  server.del('/speakers/:uuid', 
+
+    tokenCheck(true),
+
+    function (req, res, next)
+  {
+    async.waterfall([
+
+      /* Obtain the document */
+      function (cb) {
+        Speaker
+        .findById(req.params.uuid)
+        .populate('conference')
+        .exec(function (err, doc) {
+          if (err) {
+            return cb(err);
+          }
+
+          if (!doc) {
+            throw new restify.NotFoundError('document not found');
+          }
+
+          return cb(null, doc.conference, doc);
+        });
+      },
+
+      /* Check the user has rights to remove a doc from the conf */
+      function (conf, doc, cb) {
+        var perms = []
+          .concat(conf.get('users.collaborator'))
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to edit conference'));
+        }
+
+        cb(null, conf, doc);
+      },
+
+      /* Remove the document from the conference */
+      function (conf, doc, cb) {
+        conf.documents.remove(doc.id);
+        conf.save(function (err) {
+          cb(err, doc);
+        });
+      },
+
+      /* Remove the document */
+      function (doc, cb) {
+        Speaker.findById(doc.id).remove().exec(function (err) {
+          cb(err, doc);
+        });
+      }
+
+    ], function (err, doc) {
+      if (err) return next(err);
+
+      res.end();
+      return next();
+    });
+  });
 };
