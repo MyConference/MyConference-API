@@ -125,7 +125,7 @@ module.exports = function (server) {
         var doc = new AgendaEvent({
           'title':       req.body.title,
           'description': req.body.description,
-          'type':        req.body.date,
+          'date':        req.body.date,
 
           'conference':  conf.id
         });
