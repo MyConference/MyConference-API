@@ -17,8 +17,8 @@
   "dependencies": {
     "async": "^0.9.0",
     "bcrypt": "^0.7.8",
-    "mandrill-api": "^1.0.39",
-    "mongoose": "^3.8.11",
+    "mandrill-api": "^1.0.40",
+    "mongoose": "^3.9.0",
     "node-transloadit": "^0.0.4",
     "node-uuid": "^1.4.1",
     "passport": "^0.2.0",
@@ -26,7 +26,7 @@
     "restify": "^2.8.1",
     "sprintf": "^0.1.3",
     "underscore": "^1.6.0",
-    "validator": "^3.12.0",
+    "validator": "^3.16.0",
     "winston": "^0.7.2"
   },
   "devDependencies": {

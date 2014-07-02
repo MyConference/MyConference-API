@@ -95,6 +95,7 @@ var commands = {
       case 'POST':   fun = client.post.bind(client, path, body); break;
       case 'DELETE': fun = client.del.bind(client, path); break;
       case 'PUT':    fun = client.put.bind(client, path, body); break;
+      case 'PATCH':  fun = client.patch.bind(client, path, body); break;
       case 'HEAD':   fun = client.head.bind(client, path); break;
       default:
         winston.error('Method %s not available', method);

@@ -190,7 +190,103 @@ module.exports = function (server) {
   });
 
 
+  server.patch('/conferences/:uuid',
+    /* Token check */
+    tokenCheck(true),
 
+    /* Body check */
+    bodyCheck({
+      'type': Object,
+      'fields': {
+        /* Name of the conference */
+        'name': {
+          'type': String,
+          'optional': true
+        },
+
+        /* Description of the conference */
+        'description': {
+          'type': String,
+          'optional': true
+        },
+
+        /* CSS class name of the conference */
+        'css': {
+          'type': String,
+          'optional': true
+        }
+      }
+    }),
+
+    /* Actual code */
+    function (req, res, next)
+  {
+    async.waterfall([
+      /* Obtain the old conference */
+      function (cb) {
+        Conference
+          .findById(req.params.uuid)
+          .exec(function (err, conf)
+        {
+          if (err) {
+            return cb(err);
+          }
+
+          if (!conf) {
+            return cb(new restify.NotFoundError('conference not found'));
+          }
+
+          cb(null, conf);
+        });
+      },
+
+      /* Check permissions */
+      function (conf, cb) {
+        var perms = []
+          .concat(conf.get('users.collaborator'))
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to edit conference'));
+        }
+
+        cb(null, conf);
+      },
+
+      /* Populate the conference */
+      function (conf, cb) {
+        conf.name        = req.body.name        || conf.name;
+        conf.description = req.body.description || conf.description;
+
+        cb(null, conf);
+      },
+
+      /* Save it */
+      function (conf, cb) {
+        conf.save(function (err) {
+          if (err) {
+            return cb(err);
+          }
+
+          cb(null, conf);
+        });
+      },
+    ],
+
+    /* Return the conference */
+    function (err, conf) {
+      if (err) {
+        return next(err);
+      }
+
+      res.send(conf.toFullRepr());
+      next();
+    });
+  });
 
 
   server.del('/conferences/:uuid',
