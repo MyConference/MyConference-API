@@ -21,8 +21,6 @@
     "mongoose": "^3.8.12",
     "node-transloadit": "^0.0.4",
     "node-uuid": "^1.4.1",
-    "passport": "^0.2.0",
-    "passport-google": "^0.3.0",
     "restify": "^2.8.1",
     "sprintf": "^0.1.3",
     "underscore": "^1.6.0",
