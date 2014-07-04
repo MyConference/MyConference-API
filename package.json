@@ -18,7 +18,7 @@
     "async": "^0.9.0",
     "bcrypt": "^0.7.8",
     "mandrill-api": "^1.0.40",
-    "mongoose": "^3.9.0",
+    "mongoose": "^3.8.12",
     "node-transloadit": "^0.0.4",
     "node-uuid": "^1.4.1",
     "passport": "^0.2.0",
