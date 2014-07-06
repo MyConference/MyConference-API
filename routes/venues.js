@@ -170,6 +170,122 @@ module.exports = function (server) {
   });
 
 
+  server.patch('/venues/:uuid',
+    /* Token check */
+    tokenCheck(true),
+
+    /* Body check */
+    bodyCheck({
+      'type': Object,
+      'fields': {
+
+
+        /* Name of the venue */
+        'name': {
+          'type': String,
+          'optional': true
+        },
+
+        /* Location of the venue */
+        'location': {
+          'type': Object,
+          'optional': true,
+          'fields': {
+
+            'lat': {
+              'type': Number
+            },
+
+            'lng': {
+              'type': Number
+            }
+          }
+        },
+
+        /* Details of thevenue */
+        'details': {
+          'type': String,
+          'optional': true
+        }
+      }
+    }),
+
+    /* Actual code */
+    function (req, res, next)
+  {
+    async.waterfall([
+
+      /* Get the conference in which the doc is being edited */
+      function (cb) {
+        Conference
+        .findById(req.body.conference)
+        .exec(function (err, conf) {
+          if (err) return cb(err);
+
+          if (!conf) {
+            return cb(new restify.NotFoundError());
+          }
+
+          cb(null, conf);
+        });
+      },
+
+      /* Check the user has rights to edit a doc to the conf */
+      function (conf, cb) {
+        var perms = []
+          .concat(conf.get('users.collaborator'))
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to edit conference'));
+        }
+
+        cb(null, conf);
+      },
+
+      /* Get the document */
+      function (conf, cb) {
+        Venue.findById(req.params.uuid)
+        .populate('conference')
+        .exec(function (err, doc) {
+          if (err) return cb(err);
+
+          if (!doc) {
+            return cb(new restify.NotFoundError());
+          }
+
+          cb(null, doc);
+        });
+      },
+
+      /* Modify and save the doc */
+      function (doc, cb) {
+        doc.name     = req.body.name     || doc.name,
+        doc.details  = req.body.details  || doc.details,
+        doc.location = req.body.location || doc.location,
+
+        doc.save(function (err) {
+          if (err) return cb(err);
+
+          cb(null, doc);
+        });
+      },
+
+    ], function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+
+      res.send(doc.toFullRepr());
+      next();
+    });
+  });
+
+
   server.del('/venues/:uuid', 
 
     tokenCheck(true),

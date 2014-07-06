@@ -172,11 +172,6 @@ module.exports = function (server) {
     bodyCheck({
       'type': Object,
       'fields': {
-        /* Conference in which to add the doc */
-        'conference': {
-          'type': String,
-          'optional': true
-        },
 
 
         /* Document title */

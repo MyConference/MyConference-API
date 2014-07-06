@@ -158,6 +158,111 @@ module.exports = function (server) {
   });
 
 
+  server.patch('/agenda-events/:uuid',
+    /* Token check */
+    tokenCheck(true),
+
+    /* Body check */
+    bodyCheck({
+      'type': Object,
+      'fields': {
+
+        /* Document title */
+        'title': {
+          'type': String,
+          'optional': true
+        },
+
+        /* Document description */
+        'description': {
+          'type': String,
+          'optional': true
+        },
+
+        /* Document data type */
+        'date': {
+          'type': Date,
+          'optional': true
+        }
+      }
+    }),
+
+    /* Actual code */
+    function (req, res, next)
+  {
+    async.waterfall([
+
+      /* Get the conference in which the doc is being edited */
+      function (cb) {
+        Conference
+        .findById(req.body.conference)
+        .exec(function (err, conf) {
+          if (err) return cb(err);
+
+          if (!conf) {
+            return cb(new restify.NotFoundError());
+          }
+
+          cb(null, conf);
+        });
+      },
+
+      /* Check the user has rights to edit a doc to the conf */
+      function (conf, cb) {
+        var perms = []
+          .concat(conf.get('users.collaborator'))
+          .concat(conf.get('users.owner'))
+          .some(function (user)
+        {
+          return user == req.user.id;
+        });
+
+        if (!perms) {
+          return cb(new restify.ForbiddenError('not allowed to edit conference'));
+        }
+
+        cb(null, conf);
+      },
+
+      /* Get the document */
+      function (conf, cb) {
+        AgendaEvent.findById(req.params.uuid)
+        .populate('conference')
+        .exec(function (err, doc) {
+          if (err) return cb(err);
+
+          if (!doc) {
+            return cb(new restify.NotFoundError());
+          }
+
+          cb(null, doc);
+        });
+      },
+
+      /* Modify and save the doc */
+      function (doc, cb) {
+        doc.title       = req.body.title       || doc.title,
+        doc.description = req.body.description || doc.description,
+        doc.date        = req.body.date        || doc.date,
+
+        doc.save(function (err) {
+          if (err) return cb(err);
+
+          cb(null, doc);
+        });
+      },
+
+    ], function (err, doc) {
+      if (err) {
+        return next(err);
+      }
+
+      res.send(doc.toFullRepr());
+      next();
+    });
+  });
+
+
   server.del('/agenda-events/:uuid', 
 
     tokenCheck(true),
