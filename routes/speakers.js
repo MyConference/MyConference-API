@@ -210,23 +210,25 @@ module.exports = function (server) {
   {
     async.waterfall([
 
-      /* Get the conference in which the doc is being edited */
+      /* Get the document */
       function (cb) {
-        Conference
-        .findById(req.body.conference)
-        .exec(function (err, conf) {
+        Speaker.findById(req.params.uuid)
+        .populate('conference')
+        .exec(function (err, doc) {
           if (err) return cb(err);
 
-          if (!conf) {
+          if (!doc) {
             return cb(new restify.NotFoundError());
           }
 
-          cb(null, conf);
+          cb(null, doc);
         });
       },
 
       /* Check the user has rights to edit a doc to the conf */
-      function (conf, cb) {
+      function (doc, cb) {
+        var conf = doc.conference;
+
         var perms = []
           .concat(conf.get('users.collaborator'))
           .concat(conf.get('users.owner'))
@@ -239,22 +241,7 @@ module.exports = function (server) {
           return cb(new restify.ForbiddenError('not allowed to edit conference'));
         }
 
-        cb(null, conf);
-      },
-
-      /* Get the document */
-      function (conf, cb) {
-        Speaker.findById(req.params.uuid)
-        .populate('conference')
-        .exec(function (err, doc) {
-          if (err) return cb(err);
-
-          if (!doc) {
-            return cb(new restify.NotFoundError());
-          }
-
-          cb(null, doc);
-        });
+        cb(null, doc);
       },
 
       /* Modify and save the doc */
